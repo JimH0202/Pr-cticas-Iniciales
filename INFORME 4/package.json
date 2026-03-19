@@ -1,0 +1,16 @@
+{
+  "name": "universidad-fullstack",
+  "version": "1.0.0",
+  "description": "Aplicación fullstack Universidad",
+  "scripts": {
+    "install-backend": "cd Universidad-app && npm install",
+    "install-frontend": "cd universidad-frontend && npm install",
+    "install-all": "npm run install-backend && npm run install-frontend",
+    "dev-backend": "cd Universidad-app && npm run dev",
+    "dev-frontend": "cd universidad-frontend && ng serve",
+    "dev": "concurrently \"npm run dev-backend\" \"npm run dev-frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
