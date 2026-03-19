@@ -4,7 +4,7 @@ API REST desarrollada en Node.js para una plataforma de registro y calificación
 
 ---
 
-## 📦 Requisitos
+## Requisitos
 
 - Node.js 18+ (recomendado)
 - MySQL (servidor local o remoto)
@@ -12,7 +12,7 @@ API REST desarrollada en Node.js para una plataforma de registro y calificación
 
 ---
 
-## 🛠️ Instalación y configuración
+## Instalación y configuración
 
 ### 1) Clonar el repositorio
 
@@ -81,7 +81,7 @@ CORS_ORIGIN=http://localhost:4200
 
 ---
 
-## 🗄️ Base de datos
+## Base de datos
 
 ### Estructura de tablas (resumen)
 
@@ -121,7 +121,7 @@ CORS_ORIGIN=http://localhost:4200
 
 ---
 
-## 🔍 Consultas (mínimo)
+## Consultas (mínimo)
 
 ### 1) Listar usuarios
 
@@ -176,7 +176,7 @@ VALUES ('Inteligencia Artificial', 'IC-303', 4, 1);
 
 ---
 
-## 🔌 Conexión con el servidor (Backend)
+## Conexión con el servidor (Backend)
 
 El backend se conecta a MySQL mediante un pool de conexiones en `src/config/db.js`.
 
@@ -195,7 +195,7 @@ const pool = mysql.createPool({
 
 ---
 
-## 🚀 Servidor – Backend (Node.js)
+## Servidor – Backend (Node.js)
 
 ### Estructura principal
 
@@ -215,7 +215,7 @@ La API quedará disponible en: **http://localhost:3000**
 
 ---
 
-## 🧩 Servicios REST API (endpoints)
+## Servicios REST API (endpoints)
 
 ### Autenticación
 
@@ -259,7 +259,7 @@ La API quedará disponible en: **http://localhost:3000**
 
 ---
 
-## 🧪 Evidencia de respuesta / consumo de servicio
+## Evidencia de respuesta / consumo de servicio
 
 ### 1) Probar que el servidor responde
 
@@ -350,7 +350,41 @@ Ejemplo de respuesta:
 
 ---
 
-## 📌 Notas finales
+## Pruebas automáticas
+
+Se incluyen pruebas automáticas para:
+
+- **Consultas SQL básicas** (verificar que existan tablas y datos de ejemplo).
+- **Servicios REST API** (endpoints principales, login y acceso protegido).
+
+### Ejecutar pruebas
+
+1) Asegúrate de tener la base de datos creada usando `sql/esquema.sql`.
+2) Crea un `.env` con tus credenciales (o copia `.env.test.example` a `.env.test`):
+
+```bash
+cp .env.test.example .env.test
+```
+
+3) Instala dependencias (si no lo has hecho aún):
+
+```bash
+npm install
+```
+
+4) Ejecuta las pruebas:
+
+```bash
+npm test
+```
+
+> Las pruebas usan el usuario de ejemplo `usuario@ejemplo.com` con contraseña `admin123` (insertado en `sql/esquema.sql`).
+>
+> Si no configuras correctamente las credenciales de MySQL, las pruebas de base de datos e API se omitirán automáticamente.
+
+---
+
+## Notas finales
 
 - Si cambias de entorno (por ejemplo `DB_HOST` o `DB_NAME`), asegúrate de volver a ejecutar `sql/esquema.sql` para crear las tablas.
 - El backend usa JWT para autenticación; el token expira según `JWT_EXPIRES_IN` en `.env`.
