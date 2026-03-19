@@ -8,7 +8,17 @@ const sanitizeUser = (user) => {
 
 const register = async (req, res, next) => {
   try {
+    console.log('Body recibido:', req.body);
     const { registro, nombres, apellidos, email, password } = req.body;
+    
+    // Validar campos requeridos
+    if (!registro || !nombres || !apellidos || !email || !password) {
+      console.log('Campos faltantes:', { registro, nombres, apellidos, email, password });
+      const error = new Error('Campos requeridos: registro, nombres, apellidos, email, password');
+      error.status = 400;
+      throw error;
+    }
+    
     const user = await authService.register({ registro, nombres, apellidos, email, password });
     res.status(201).json({ user: sanitizeUser(user) });
   } catch (err) {
