@@ -1,11 +1,9 @@
--- EJEMPLOS DE CONSULTAS BÁSICAS PARA UNIVERSIDAD_APP
--- ====================================================
+
 
 USE universidad_app;
 
--- ============================================================
 -- 1. SELECT - LEER DATOS
--- ============================================================
+
 
 -- Listar todos los usuarios con sus cursos aprobados
 SELECT 
@@ -54,9 +52,8 @@ LEFT JOIN cursos_aprobados ca ON c.id = ca.curso_id
 GROUP BY c.id
 ORDER BY c.nombre;
 
--- ============================================================
 -- 2. INSERT - INSERTAR DATOS
--- ============================================================
+
 
 -- Insertar un nuevo usuario
 INSERT INTO usuarios (registro, nombres, apellidos, email, password_hash)
@@ -82,9 +79,7 @@ VALUES (1, 2, 'Totalmente de acuerdo, muy buen docente');
 INSERT INTO cursos_aprobados (usuario_id, curso_id)
 VALUES (1, 1);
 
--- ============================================================
 -- 3. DELETE - ELIMINAR DATOS (CON PRECAUCIÓN)
--- ============================================================
 
 -- Eliminar un comentario específico
 DELETE FROM comentarios 
@@ -102,9 +97,8 @@ WHERE usuario_id = 5 AND curso_id = 2;
 DELETE FROM profesores 
 WHERE id = 1;
 
--- ============================================================
--- BONUS: UPDATE - ACTUALIZAR DATOS
--- ============================================================
+-- UPDATE - ACTUALIZAR DATOS
+
 
 -- Actualizar datos de un usuario
 UPDATE usuarios 
@@ -116,9 +110,8 @@ UPDATE cursos
 SET profesor_id = 2, creditos = 3
 WHERE id = 1;
 
--- ============================================================
+
 -- BÚSQUEDAS CON FILTROS
--- ============================================================
 
 -- Buscar usuario por email
 SELECT * FROM usuarios WHERE email = 'usuario@ejemplo.com';

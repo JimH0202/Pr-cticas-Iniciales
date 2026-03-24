@@ -1,4 +1,4 @@
--- Esquema de la base de datos para Universidad App
+-- Esquema de la base de datos
 
 CREATE DATABASE IF NOT EXISTS universidad_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE universidad_app;

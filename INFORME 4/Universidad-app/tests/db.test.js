@@ -10,7 +10,7 @@ beforeAll(async () => {
     await pool.query('SELECT 1');
   } catch (err) {
     canConnect = false;
-    console.warn('⚠️ No se pudo conectar a la base de datos. Asegúrate de tener `.env` con credenciales válidas.');
+    console.warn('No se pudo conectar a la base de datos. Asegúrate de tener `.env` con credenciales válidas.');
   }
 });
 

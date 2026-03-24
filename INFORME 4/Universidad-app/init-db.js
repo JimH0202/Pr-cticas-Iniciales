@@ -16,7 +16,7 @@ async function setupDB() {
     const [results] = await connection.query(sql);
     
     await connection.end();
-    console.log('✓ Base de datos creada correctamente');
+    console.log('Base de datos creada correctamente');
   } catch (err) {
     console.error('Error:', err.message);
     process.exit(1);
