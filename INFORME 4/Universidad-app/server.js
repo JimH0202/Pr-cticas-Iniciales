@@ -11,7 +11,7 @@ app.listen(PORT, async () => {
   console.log('\nINFORMACIÓN DE CONEXIÓN - BACKEND\n');
 
   // Información de conexión
-  console.log('Estado: CTIVO');
+  console.log('Estado: ACTIVO');
   console.log(`URL: http://localhost:${PORT}`);
   console.log(`Puerto: ${PORT}`);
   console.log(`Base de Datos: ${process.env.DB_NAME || 'universidad_app'}`);
