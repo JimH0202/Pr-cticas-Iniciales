@@ -116,7 +116,7 @@ function HomePage({ publicaciones }) {
       {/* HEADER */}
       <div className="home-header">
         <h1>Publicaciones</h1>
-        <p>Filtra y busca publicaciones de la comunidad.</p>
+        <p>Aquí puedes ver todas las publicaciones de la comunidad. Usa los filtros para buscar lo que te interesa.</p>
       </div>
 
       {/* FILTROS */}
