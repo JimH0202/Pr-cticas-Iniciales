@@ -30,7 +30,7 @@ function CreatePublicationPage({ user, onCreate }) {
  return (
   <div className="home-page">
 
-    {/* HEADER tipo Home */}
+    {/* HEADER*/}
     <div className="home-header">
       <h1>Crear Publicación</h1>
       <p>Aquí puedes crear tus publicaciones para la comunidad.</p>
@@ -121,7 +121,7 @@ function CreatePublicationPage({ user, onCreate }) {
               </div>
             </div>
             <div className="publication-date">
-              {new Date().toLocaleDateString()}
+              {new Date().toLocaleString()}
             </div>
           </div>
 

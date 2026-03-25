@@ -2,11 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PublicationCard from '../components/PublicationCard';
 import '../styles.css';
 
-function HomePage({ publicacionesExternas = [] }) {
-
-  const [publicaciones, setPublicaciones] = useState([]);
-  const [cursos, setCursos] = useState([]);
-  const [profesores, setProfesores] = useState([]);
+function HomePage({ publicaciones }) {
 
   const [filtros, setFiltros] = useState({
     cursoId: '',
@@ -16,101 +12,69 @@ function HomePage({ publicacionesExternas = [] }) {
   });
 
   const [publicacionesFiltradas, setPublicacionesFiltradas] = useState([]);
-  const [cargando, setCargando] = useState(true);
 
-  // 🔹 Carga inicial
+  // lista
+  const [cursos, setCursos] = useState([]);
+  const [profesores, setProfesores] = useState([]);
+
+  //EXTRAER CURSOS Y PROFESORES ÚNICOS
   useEffect(() => {
-    cargarDatos();
-  }, []);
+    const cursosUnicos = [];
+    const profesoresUnicos = [];
 
-  // 🔹 Cuando llegan nuevas publicaciones (desde Create)
-  useEffect(() => {
-    if (publicacionesExternas.length > 0) {
-      setPublicaciones(prev => [
-        ...publicacionesExternas,
-        ...prev
-      ]);
-    }
-  }, [publicacionesExternas]);
+    publicaciones.forEach(pub => {
+      if (pub.curso && pub.curso.nombre) {
+        if (!cursosUnicos.some(c => c.nombre === pub.curso.nombre)) {
+          cursosUnicos.push({
+            id: pub.curso.id || pub.curso.nombre,
+            nombre: pub.curso.nombre
+          });
+        }
+      }
 
-  // 🔹 Aplicar filtros
+      if (pub.profesor && pub.profesor.nombres) {
+        const nombreCompleto = `${pub.profesor.nombres} ${pub.profesor.apellidos || ''}`;
+
+        if (!profesoresUnicos.some(p => p.nombre === nombreCompleto)) {
+          profesoresUnicos.push({
+            id: pub.profesor.id || nombreCompleto,
+            nombre: nombreCompleto
+          });
+        }
+      }
+    });
+
+    setCursos(cursosUnicos);
+    setProfesores(profesoresUnicos);
+  }, [publicaciones]);
+
+  // FILTROS
   useEffect(() => {
     aplicarFiltros();
   }, [publicaciones, filtros]);
-
-  const cargarDatos = async () => {
-    try {
-      setCargando(true);
-
-      const mockPublicaciones = [
-        {
-          id: 1,
-          usuario: { nombres: 'Jimmy', apellidos: 'García', registro: 'est_2024001' },
-          curso: { id: 1, nombre: 'Matemáticas Avanzadas' },
-          profesor: null,
-          mensaje: '¿Alguien tiene apuntes de Matemáticas? Me perdí la última clase.',
-          fechaCreacion: new Date('2026-03-25')
-        },
-        {
-          id: 2,
-          usuario: { nombres: 'Brian', apellidos: 'Rodríguez', registro: 'prof_001' },
-          curso: null,
-          profesor: { id: 2, nombres: 'Carlos', apellidos: 'López' },
-          mensaje: 'La clase de mañana será en el aula 5, no en el aula 3.',
-          fechaCreacion: new Date('2026-03-24')
-        },
-        {
-          id: 3,
-          usuario: { nombres: 'Ana', apellidos: 'Martínez', registro: 'est_2024002' },
-          curso: { id: 3, nombre: 'Bases de Datos' },
-          profesor: null,
-          mensaje: 'Recomiendo el libro de Bases de Datos de C.J. Date.',
-          fechaCreacion: new Date('2026-03-23')
-        }
-      ];
-
-      const mockCursos = [
-        { id: 1, nombre: 'Matemáticas Avanzadas' },
-        { id: 2, nombre: 'Programación Web' },
-        { id: 3, nombre: 'Bases de Datos' }
-      ];
-
-      const mockProfesores = [
-        { id: 1, nombres: 'Dr.', apellidos: 'García' },
-        { id: 2, nombres: 'Carlos', apellidos: 'López' },
-        { id: 3, nombres: 'Dr.', apellidos: 'Martínez' }
-      ];
-
-      // 🔥 mezcla inicial
-      setPublicaciones([
-        ...publicacionesExternas,
-        ...mockPublicaciones
-      ]);
-
-      setCursos(mockCursos);
-      setProfesores(mockProfesores);
-      setCargando(false);
-
-    } catch (error) {
-      console.error('Error al cargar datos:', error);
-      setCargando(false);
-    }
-  };
 
   const aplicarFiltros = () => {
     let resultado = [...publicaciones];
 
     if (filtros.cursoId) {
-      resultado = resultado.filter(pub => pub.curso?.id === parseInt(filtros.cursoId));
+      resultado = resultado.filter(
+        pub =>
+          (pub.curso?.id || pub.curso?.nombre) === filtros.cursoId
+      );
     }
 
     if (filtros.profesorId) {
-      resultado = resultado.filter(pub => pub.profesor?.id === parseInt(filtros.profesorId));
+      resultado = resultado.filter(pub => {
+        const nombreCompleto = `${pub.profesor?.nombres || ''} ${pub.profesor?.apellidos || ''}`;
+        return (pub.profesor?.id || nombreCompleto) === filtros.profesorId;
+      });
     }
 
     if (filtros.nombreCurso.trim()) {
       resultado = resultado.filter(pub =>
-        pub.curso?.nombre?.toLowerCase().includes(filtros.nombreCurso.toLowerCase())
+        pub.curso?.nombre
+          ?.toLowerCase()
+          .includes(filtros.nombreCurso.toLowerCase())
       );
     }
 
@@ -122,8 +86,9 @@ function HomePage({ publicacionesExternas = [] }) {
       );
     }
 
-    //ORDENAR POR FECHA (más recientes primero)
-    resultado.sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion));
+    resultado.sort(
+      (a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion)
+    );
 
     setPublicacionesFiltradas(resultado);
   };
@@ -145,20 +110,13 @@ function HomePage({ publicacionesExternas = [] }) {
     });
   };
 
-  if (cargando) {
-    return (
-      <div className="home-page">
-        <p className="loading">Cargando publicaciones...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="home-page">
 
+      {/* HEADER */}
       <div className="home-header">
         <h1>Publicaciones</h1>
-        <p>Explora lo que está pasando en la comunidad.</p>
+        <p>Filtra y busca publicaciones de la comunidad.</p>
       </div>
 
       {/* FILTROS */}
@@ -168,9 +126,14 @@ function HomePage({ publicacionesExternas = [] }) {
 
           <div className="filtros-grid">
 
+            {/* 🔽 DROPDOWN CURSOS */}
             <div className="filtro-group">
-              <label>Curso:</label>
-              <select name="cursoId" value={filtros.cursoId} onChange={handleFiltroChange}>
+              <label>Filtrar por Curso:</label>
+              <select
+                name="cursoId"
+                value={filtros.cursoId}
+                onChange={handleFiltroChange}
+              >
                 <option value="">Todos</option>
                 {cursos.map(curso => (
                   <option key={curso.id} value={curso.id}>
@@ -180,35 +143,44 @@ function HomePage({ publicacionesExternas = [] }) {
               </select>
             </div>
 
+            {/* PROFESORES */}
             <div className="filtro-group">
-              <label>Catedrático:</label>
-              <select name="profesorId" value={filtros.profesorId} onChange={handleFiltroChange}>
+              <label>Filtrar por Catedrático:</label>
+              <select
+                name="profesorId"
+                value={filtros.profesorId}
+                onChange={handleFiltroChange}
+              >
                 <option value="">Todos</option>
                 {profesores.map(prof => (
                   <option key={prof.id} value={prof.id}>
-                    {prof.nombres} {prof.apellidos}
+                    {prof.nombre}
                   </option>
                 ))}
               </select>
             </div>
 
+            {/* NOMBRE CURSO */}
             <div className="filtro-group">
-              <label>Buscar Curso:</label>
+              <label>Nombre de Curso:</label>
               <input
+                type="text"
                 name="nombreCurso"
+                placeholder="Ej: Programación"
                 value={filtros.nombreCurso}
                 onChange={handleFiltroChange}
-                placeholder="Ej: Programación"
               />
             </div>
 
+            {/* NOMBRE PROFESOR */}
             <div className="filtro-group">
-              <label>Buscar Catedrático:</label>
+              <label>Nombre de Catedrático:</label>
               <input
+                type="text"
                 name="nombreProfesor"
+                placeholder="Ej: García"
                 value={filtros.nombreProfesor}
                 onChange={handleFiltroChange}
-                placeholder="Ej: García"
               />
             </div>
 
@@ -222,18 +194,20 @@ function HomePage({ publicacionesExternas = [] }) {
 
       {/* PUBLICACIONES */}
       <div className="publicaciones-section">
-        <div className="publicaciones-info">
-          <p className="result-count">
-            {publicacionesFiltradas.length === 0
-              ? 'No hay publicaciones'
-              : `${publicacionesFiltradas.length} publicación(es)`}
-          </p>
-        </div>
-
         <div className="publicaciones-list">
-          {publicacionesFiltradas.map(pub => (
-            <PublicationCard key={pub.id} publicacion={pub} />
-          ))}
+          {publicacionesFiltradas.length > 0 ? (
+            publicacionesFiltradas.map((publicacion) => (
+              <PublicationCard
+                key={publicacion.id}
+                publicacion={publicacion}
+              />
+            ))
+          ) : (
+            <div className="empty-state">
+              <p>📭</p>
+              <p>Sé el primero en crear una publicación</p>
+            </div>
+          )}
         </div>
       </div>
 

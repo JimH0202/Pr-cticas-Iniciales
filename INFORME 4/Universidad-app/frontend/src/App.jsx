@@ -8,15 +8,20 @@ import CreatePublicationPage from './pages/CreatePublicationPage';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [page, setPage] = useState('login'); // control de navegación (login, register, forgot)
-  const [currentPage, setCurrentPage] = useState('home'); // control de páginas después del login (home, createPublication, myProfile, userProfile)
-  const [searchedUserId, setSearchedUserId] = useState(null); // Para el perfil de usuario buscado
-const [publicaciones, setPublicaciones] = useState([]); // Estado para almacenar publicaciones y conectarlas directamente en homePage
+  const [page, setPage] = useState('login');
+  const [currentPage, setCurrentPage] = useState('home');
+  const [searchedUserId, setSearchedUserId] = useState(null);
+  const [publicaciones, setPublicaciones] = useState([]);
 
-  const handleLoginSuccess = (loggedUser, token) => {
+  // Una función para crear publicaciones
+  const handleCreatePost = (newPost) => {
+    setPublicaciones(prev => [newPost, ...prev]);
+    setCurrentPage('home');
+  };
+
+  const handleLoginSuccess = (loggedUser) => {
     setUser(loggedUser);
-    setCurrentPage('home'); // Redirige a home después de login
-    console.log('Usuario logueado:', loggedUser);
+    setCurrentPage('home');
   };
 
   const handleLogout = () => {
@@ -28,7 +33,7 @@ const [publicaciones, setPublicaciones] = useState([]); // Estado para almacenar
 
   const handleNavigate = (destination) => {
     setCurrentPage(destination);
-    setSearchedUserId(null); // Limpia búsqueda al navegar
+    setSearchedUserId(null);
   };
 
   const handleSearchUser = (userId) => {
@@ -36,12 +41,7 @@ const [publicaciones, setPublicaciones] = useState([]); // Estado para almacenar
     setCurrentPage('userProfile');
   };
 
-  const handleCreatePost = (newPost) => {
-  setPublicaciones(prev => [newPost, ...prev]); // lo pone arriba (más reciente)
-  setCurrentPage('home'); // redirige automáticamente
-};
-
-  // Pantalla de autenticación (login, register, forgot password)
+  // LOGIN / AUTH
   if (!user) {
     return (
       <div>
@@ -58,21 +58,17 @@ const [publicaciones, setPublicaciones] = useState([]); // Estado para almacenar
         )}
 
         {page === 'register' && (
-          <RegisterPage
-            onBackToLogin={() => setPage('login')}
-          />
+          <RegisterPage onBackToLogin={() => setPage('login')} />
         )}
 
         {page === 'forgot' && (
-          <ForgotPasswordPage
-            onBackToLogin={() => setPage('login')}
-          />
+          <ForgotPasswordPage onBackToLogin={() => setPage('login')} />
         )}
       </div>
     );
   }
 
-  // Pantalla principal después del login
+  // APP
   return (
     <div className="App">
       <Navbar 
@@ -83,11 +79,11 @@ const [publicaciones, setPublicaciones] = useState([]); // Estado para almacenar
       />
 
       {currentPage === 'home' && (
-        <HomePage publicacionesExternas={publicaciones} />
+        <HomePage publicaciones={publicaciones} />
       )}
 
       {currentPage === 'createPublication' && (
-         <CreatePublicationPage 
+        <CreatePublicationPage 
           user={user}
           onCreate={handleCreatePost}
         />
@@ -96,14 +92,14 @@ const [publicaciones, setPublicaciones] = useState([]); // Estado para almacenar
       {currentPage === 'myProfile' && (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
           <h2>Mi Perfil</h2>
-          <p>Por implementar: perfil del usuario logueado con edición de datos</p>
+          <p>Por implementar...</p>
         </div>
       )}
 
       {currentPage === 'userProfile' && (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
           <h2>Perfil del Usuario</h2>
-          <p>Por implementar: perfil del usuario buscado (ID: {searchedUserId})</p>
+          <p>ID: {searchedUserId}</p>
         </div>
       )}
     </div>
