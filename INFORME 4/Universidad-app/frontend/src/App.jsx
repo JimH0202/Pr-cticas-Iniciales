@@ -2,21 +2,38 @@ import React, { useState } from 'react';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import Navbar from './components/Navbar';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [page, setPage] = useState('login'); // 🔥 control de navegación
+  const [page, setPage] = useState('login'); // 🔥 control de navegación (login, register, forgot)
+  const [currentPage, setCurrentPage] = useState('home'); // 🔥 control de páginas después del login (home, createPublication, myProfile, userProfile)
+  const [searchedUserId, setSearchedUserId] = useState(null); // Para el perfil de usuario buscado
 
   const handleLoginSuccess = (loggedUser, token) => {
     setUser(loggedUser);
+    setCurrentPage('home'); // Redirige a home después de login
     console.log('Usuario logueado:', loggedUser);
   };
 
   const handleLogout = () => {
     setUser(null);
     setPage('login');
+    setCurrentPage('home');
+    setSearchedUserId(null);
   };
 
+  const handleNavigate = (destination) => {
+    setCurrentPage(destination);
+    setSearchedUserId(null); // Limpia búsqueda al navegar
+  };
+
+  const handleSearchUser = (userId) => {
+    setSearchedUserId(userId);
+    setCurrentPage('userProfile');
+  };
+
+  // Pantalla de autenticación (login, register, forgot password)
   if (!user) {
     return (
       <div>
@@ -47,10 +64,45 @@ function App() {
     );
   }
 
+  // Pantalla principal después del login
   return (
-    <div style={{ textAlign: 'center', marginTop: 50 }}>
-      <h1>Bienvenido, {user.nombres || user.registro}</h1>
-      <button onClick={handleLogout}>Cerrar sesión</button>
+    <div className="App">
+      <Navbar 
+        user={user}
+        onLogout={handleLogout}
+        onNavigate={handleNavigate}
+        onSearchUser={handleSearchUser}
+      />
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
+        {currentPage === 'home' && (
+          <div>
+            <h2>Pantalla Inicial - Todas las Publicaciones</h2>
+            <p>Por implementar: mostrar publicaciones con filtros</p>
+          </div>
+        )}
+
+        {currentPage === 'createPublication' && (
+          <div>
+            <h2>Crear Publicación</h2>
+            <p>Por implementar: formulario para crear publicaciones</p>
+          </div>
+        )}
+
+        {currentPage === 'myProfile' && (
+          <div>
+            <h2>Mi Perfil</h2>
+            <p>Por implementar: perfil del usuario logueado con edición de datos</p>
+          </div>
+        )}
+
+        {currentPage === 'userProfile' && (
+          <div>
+            <h2>Perfil del Usuario</h2>
+            <p>Por implementar: perfil del usuario buscado (ID: {searchedUserId})</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
