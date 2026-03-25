@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import HomePage from './pages/HomePage';
 import Navbar from './components/Navbar';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [page, setPage] = useState('login'); // 🔥 control de navegación (login, register, forgot)
-  const [currentPage, setCurrentPage] = useState('home'); // 🔥 control de páginas después del login (home, createPublication, myProfile, userProfile)
+  const [page, setPage] = useState('login'); // control de navegación (login, register, forgot)
+  const [currentPage, setCurrentPage] = useState('home'); // control de páginas después del login (home, createPublication, myProfile, userProfile)
   const [searchedUserId, setSearchedUserId] = useState(null); // Para el perfil de usuario buscado
 
   const handleLoginSuccess = (loggedUser, token) => {
@@ -74,35 +75,28 @@ function App() {
         onSearchUser={handleSearchUser}
       />
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
-        {currentPage === 'home' && (
-          <div>
-            <h2>Pantalla Inicial - Todas las Publicaciones</h2>
-            <p>Por implementar: mostrar publicaciones con filtros</p>
-          </div>
-        )}
+      {currentPage === 'home' && <HomePage />}
 
-        {currentPage === 'createPublication' && (
-          <div>
-            <h2>Crear Publicación</h2>
-            <p>Por implementar: formulario para crear publicaciones</p>
-          </div>
-        )}
+      {currentPage === 'createPublication' && (
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
+          <h2>Crear Publicación</h2>
+          <p>Por implementar: formulario para crear publicaciones</p>
+        </div>
+      )}
 
-        {currentPage === 'myProfile' && (
-          <div>
-            <h2>Mi Perfil</h2>
-            <p>Por implementar: perfil del usuario logueado con edición de datos</p>
-          </div>
-        )}
+      {currentPage === 'myProfile' && (
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
+          <h2>Mi Perfil</h2>
+          <p>Por implementar: perfil del usuario logueado con edición de datos</p>
+        </div>
+      )}
 
-        {currentPage === 'userProfile' && (
-          <div>
-            <h2>Perfil del Usuario</h2>
-            <p>Por implementar: perfil del usuario buscado (ID: {searchedUserId})</p>
-          </div>
-        )}
-      </div>
+      {currentPage === 'userProfile' && (
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
+          <h2>Perfil del Usuario</h2>
+          <p>Por implementar: perfil del usuario buscado (ID: {searchedUserId})</p>
+        </div>
+      )}
     </div>
   );
 }
