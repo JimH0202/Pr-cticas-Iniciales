@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { login } from '../services/apiClient';
 import '../styles.css';
 
-function LoginPage({ onLoginSuccess, onShowRegister }) {
+function LoginPage({ onLoginSuccess, onShowRegister, onShowForgotPassword }) {
   const [registro, setRegistro] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,14 +15,15 @@ function LoginPage({ onLoginSuccess, onShowRegister }) {
 
     try {
       const { token, user } = await login({ registro, password });
+
       localStorage.setItem('jwtToken', token);
       localStorage.setItem('user', JSON.stringify(user));
+
       setRegistro('');
       setPassword('');
 
-      if (typeof onLoginSuccess === 'function') {
-        onLoginSuccess(user, token);
-      }
+      onLoginSuccess(user, token);
+
     } catch (err) {
       if (err.response) {
         setError(err.response.data?.message || 'Error en el servidor');
@@ -42,23 +43,20 @@ function LoginPage({ onLoginSuccess, onShowRegister }) {
 
       <form onSubmit={handleSubmit}>
         <div className="input-group">
-          <label htmlFor="registro">Registro / Email</label>
+          <label>Registro / Email</label>
           <input
-            id="registro"
             value={registro}
             onChange={(e) => setRegistro(e.target.value)}
-            type="text"
             required
           />
         </div>
 
         <div className="input-group">
-          <label htmlFor="password">Contraseña</label>
+          <label>Contraseña</label>
           <input
-            id="password"
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            type="password"
             required
           />
         </div>
@@ -73,12 +71,7 @@ function LoginPage({ onLoginSuccess, onShowRegister }) {
           Crear una cuenta
         </button>
 
-        <button
-          type="button"
-          onClick={() =>
-            alert('Redirigir a recuperar contraseña (funcionalidad a implementar)')
-          }
-        >
+        <button type="button" onClick={onShowForgotPassword}>
           Olvidé mi contraseña
         </button>
       </div>

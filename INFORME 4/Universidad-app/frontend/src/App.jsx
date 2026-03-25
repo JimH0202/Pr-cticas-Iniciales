@@ -1,39 +1,47 @@
 import React, { useState } from 'react';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [showRegister, setShowRegister] = useState(false);
+  const [page, setPage] = useState('login'); // 🔥 control de navegación
 
   const handleLoginSuccess = (loggedUser, token) => {
     setUser(loggedUser);
     console.log('Usuario logueado:', loggedUser);
   };
 
-  const handleRegisterSuccess = (registeredUser) => {
-    setUser(registeredUser);
-    console.log('Usuario registrado:', registeredUser);
+  const handleLogout = () => {
+    setUser(null);
+    setPage('login');
   };
-
-  const handleBackToLogin = () => {
-    setShowRegister(false);
-  };
-
-  const handleShowRegister = () => {
-    setShowRegister(true);
-  };
-
-  console.log('App render, user:', user);
 
   if (!user) {
     return (
       <div>
-        <h1 style={{ textAlign: 'center', marginTop: 40 }}>Universidad App</h1>
-        {showRegister ? (
-          <RegisterPage onRegisterSuccess={handleRegisterSuccess} onBackToLogin={handleBackToLogin} />
-        ) : (
-          <LoginPage onLoginSuccess={handleLoginSuccess} onShowRegister={handleShowRegister} />
+        <h1 style={{ textAlign: 'center', marginTop: 40 }}>
+          Universidad App
+        </h1>
+
+        {page === 'login' && (
+          <LoginPage
+            onLoginSuccess={handleLoginSuccess}
+            onShowRegister={() => setPage('register')}
+            onShowForgotPassword={() => setPage('forgot')}
+          />
+        )}
+
+        {page === 'register' && (
+          <RegisterPage
+            onBackToLogin={() => setPage('login')}
+          />
+        )}
+
+        {page === 'forgot' && (
+          <ForgotPasswordPage
+            onBackToLogin={() => setPage('login')}
+          />
         )}
       </div>
     );
@@ -42,7 +50,7 @@ function App() {
   return (
     <div style={{ textAlign: 'center', marginTop: 50 }}>
       <h1>Bienvenido, {user.nombres || user.registro}</h1>
-      <p>Login exitoso. Próximamente: Dashboard con cursos y publicaciones.</p>
+      <button onClick={handleLogout}>Cerrar sesión</button>
     </div>
   );
 }

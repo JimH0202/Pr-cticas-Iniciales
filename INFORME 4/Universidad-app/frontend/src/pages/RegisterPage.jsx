@@ -19,30 +19,19 @@ function RegisterPage({ onBackToLogin }) {
     setSuccess('');
 
     try {
-      const result = await register({
-        registro,
-        nombres,
-        apellidos,
-        password,
-        email
-      });
+      await register({ registro, nombres, apellidos, password, email });
 
-      //Mensaje de éxito
       setSuccess('Cuenta creada correctamente, redirigiendo...');
 
-      // Limpiar campos
       setRegistro('');
       setNombres('');
       setApellidos('');
       setPassword('');
       setEmail('');
 
-      //Redirección A Login después de un breve retraso (para mostrar el mensaje de éxito)
       setTimeout(() => {
-        if (typeof onBackToLogin === 'function') {
-          onBackToLogin();
-        }
-      }, 1200); //estos son 1.2 segundos
+        onBackToLogin();
+      }, 1200);
 
     } catch (err) {
       if (err.response) {
@@ -67,52 +56,27 @@ function RegisterPage({ onBackToLogin }) {
 
           <div className="input-group">
             <label>Registro académico</label>
-            <input
-              value={registro}
-              onChange={(e) => setRegistro(e.target.value)}
-              type="text"
-              required
-            />
+            <input value={registro} onChange={(e) => setRegistro(e.target.value)} required />
           </div>
 
           <div className="input-group">
             <label>Email</label>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-              required
-            />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
 
           <div className="input-group">
-            <label>Nombres</label>
-            <input
-              value={nombres}
-              onChange={(e) => setNombres(e.target.value)}
-              type="text"
-              required
-            />
+            <label>Nombre</label>
+            <input value={nombres} onChange={(e) => setNombres(e.target.value)} required />
           </div>
 
           <div className="input-group">
-            <label>Apellidos</label>
-            <input
-              value={apellidos}
-              onChange={(e) => setApellidos(e.target.value)}
-              type="text"
-              required
-            />
+            <label>Apellido</label>
+            <input value={apellidos} onChange={(e) => setApellidos(e.target.value)} required />
           </div>
 
           <div className="input-group full-width">
             <label>Contraseña</label>
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              required
-            />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
 
         </div>
@@ -123,8 +87,8 @@ function RegisterPage({ onBackToLogin }) {
       </form>
 
       <div className="register-footer">
-        <button type="button" onClick={onBackToLogin}>
-          ¿Ya tienes cuenta? Inicia sesión
+        <button onClick={onBackToLogin}>
+          ¿Ya tienes una cuenta? Inicia sesión
         </button>
       </div>
     </div>
