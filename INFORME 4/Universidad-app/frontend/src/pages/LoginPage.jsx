@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { login } from '../services/apiClient';
+import '../styles.css';
 
-function LoginPage({ onLoginSuccess }) {
+function LoginPage({ onLoginSuccess, onShowRegister }) {
   const [registro, setRegistro] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,7 @@ function LoginPage({ onLoginSuccess }) {
       localStorage.setItem('user', JSON.stringify(user));
       setRegistro('');
       setPassword('');
+
       if (typeof onLoginSuccess === 'function') {
         onLoginSuccess(user, token);
       }
@@ -33,11 +35,13 @@ function LoginPage({ onLoginSuccess }) {
   };
 
   return (
-    <div style={{ maxWidth: 420, margin: '60px auto', padding: 20, border: '1px solid #ddd', borderRadius: 10, backgroundColor: '#ffffff' }}>
-      <h2 style={{ marginBottom: 16 }}>Iniciar sesión</h2>
-      {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
+    <div className="login-container">
+      <h2 className="login-title">Iniciar sesión</h2>
+
+      {error && <div className="login-error">{error}</div>}
+
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 12 }}>
+        <div className="input-group">
           <label htmlFor="registro">Registro / Email</label>
           <input
             id="registro"
@@ -45,11 +49,10 @@ function LoginPage({ onLoginSuccess }) {
             onChange={(e) => setRegistro(e.target.value)}
             type="text"
             required
-            style={{ width: '100%', padding: 8, marginTop: 4 }}
           />
         </div>
 
-        <div style={{ marginBottom: 18 }}>
+        <div className="input-group">
           <label htmlFor="password">Contraseña</label>
           <input
             id="password"
@@ -57,18 +60,28 @@ function LoginPage({ onLoginSuccess }) {
             onChange={(e) => setPassword(e.target.value)}
             type="password"
             required
-            style={{ width: '100%', padding: 8, marginTop: 4 }}
           />
         </div>
 
-        <button type="submit" disabled={loading} style={{ width: '100%', padding: 10 }}>
+        <button type="submit" disabled={loading} className="login-button">
           {loading ? 'Conectando...' : 'Iniciar sesión'}
         </button>
       </form>
 
-      <p style={{ marginTop: 14, fontSize: 14, color: '#555' }}>
-        Usando datos mock. Credenciales: est_2024001 / admin123 o prof_001 / prof123
-      </p>
+      <div className="login-links">
+        <button type="button" onClick={onShowRegister}>
+          Crear una cuenta
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            alert('Redirigir a recuperar contraseña (funcionalidad a implementar)')
+          }
+        >
+          Olvidé mi contraseña
+        </button>
+      </div>
     </div>
   );
 }

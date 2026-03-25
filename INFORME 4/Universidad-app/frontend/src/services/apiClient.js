@@ -1,6 +1,6 @@
 import { mockUsers, mockCursos, mockPublicaciones } from './mockData';
 
-const USE_MOCK = true; // Cambiar a false cuando conectes el backend real
+const USE_MOCK = true; // Cambiar a false cuando conecte con el backend real
 
 export async function login({ registro, password }) {
   if (USE_MOCK) {
@@ -30,13 +30,25 @@ export async function fetchCursos(token) {
   // return response.data;
 }
 
-export async function fetchPublicaciones(token) {
+export async function register({ registro, nombres, apellidos, password, email }) {
   if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return mockPublicaciones;
+    // Simular delay de red
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Verificar si el registro ya existe
+    const existingUser = mockUsers.find(u => u.registro === registro || u.email === email);
+    if (existingUser) {
+      throw { response: { data: { message: 'Registro académico o email ya existe' } } };
+    }
+
+    // Agregar nuevo usuario (en mock, no persiste)
+    const newUser = { registro, nombres, apellidos, password, email };
+    mockUsers.push(newUser);
+
+    return { message: 'Usuario registrado exitosamente', user: newUser };
   }
 
-  // Código real
-  // const response = await axios.get(`${API_BASE_URL}/publicaciones`, { headers: { Authorization: `Bearer ${token}` } });
+  // Código real con axios (cuando USE_MOCK = false)
+  // const response = await axios.post(`${API_BASE_URL}/auth/register`, { registro, nombres, apellidos, password, email });
   // return response.data;
 }
