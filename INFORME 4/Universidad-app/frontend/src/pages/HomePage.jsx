@@ -2,26 +2,38 @@ import React, { useState, useEffect } from 'react';
 import PublicationCard from '../components/PublicationCard';
 import '../styles.css';
 
-function HomePage() {
-  // Estados para filtros
+function HomePage({ publicacionesExternas = [] }) {
+
   const [publicaciones, setPublicaciones] = useState([]);
   const [cursos, setCursos] = useState([]);
   const [profesores, setProfesores] = useState([]);
+
   const [filtros, setFiltros] = useState({
     cursoId: '',
     profesorId: '',
     nombreCurso: '',
     nombreProfesor: ''
   });
+
   const [publicacionesFiltradas, setPublicacionesFiltradas] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // Cargar publicaciones y datos de filtros
+  // 🔹 Carga inicial
   useEffect(() => {
     cargarDatos();
   }, []);
 
-  // Aplicar filtros cuando cambien
+  // 🔹 Cuando llegan nuevas publicaciones (desde Create)
+  useEffect(() => {
+    if (publicacionesExternas.length > 0) {
+      setPublicaciones(prev => [
+        ...publicacionesExternas,
+        ...prev
+      ]);
+    }
+  }, [publicacionesExternas]);
+
+  // 🔹 Aplicar filtros
   useEffect(() => {
     aplicarFiltros();
   }, [publicaciones, filtros]);
@@ -29,8 +41,7 @@ function HomePage() {
   const cargarDatos = async () => {
     try {
       setCargando(true);
-      // Aquí iría el fetch real al backend
-      // Por ahora usamos datos mock
+
       const mockPublicaciones = [
         {
           id: 1,
@@ -53,16 +64,8 @@ function HomePage() {
           usuario: { nombres: 'Ana', apellidos: 'Martínez', registro: 'est_2024002' },
           curso: { id: 3, nombre: 'Bases de Datos' },
           profesor: null,
-          mensaje: 'Recomiendo el libro de Bases de Datos de C.J. Date. Muy completo y didáctico.',
+          mensaje: 'Recomiendo el libro de Bases de Datos de C.J. Date.',
           fechaCreacion: new Date('2026-03-23')
-        },
-        {
-          id: 4,
-          usuario: { nombres: 'Juan', apellidos: 'Pérez', registro: 'est_2024003' },
-          curso: { id: 2, nombre: 'Programación Web' },
-          profesor: null,
-          mensaje: 'Alguien sabe cómo hacer responsive design con CSS Grid?',
-          fechaCreacion: new Date('2026-03-22')
         }
       ];
 
@@ -78,10 +81,16 @@ function HomePage() {
         { id: 3, nombres: 'Dr.', apellidos: 'Martínez' }
       ];
 
-      setPublicaciones(mockPublicaciones);
+      // 🔥 mezcla inicial
+      setPublicaciones([
+        ...publicacionesExternas,
+        ...mockPublicaciones
+      ]);
+
       setCursos(mockCursos);
       setProfesores(mockProfesores);
       setCargando(false);
+
     } catch (error) {
       console.error('Error al cargar datos:', error);
       setCargando(false);
@@ -91,33 +100,29 @@ function HomePage() {
   const aplicarFiltros = () => {
     let resultado = [...publicaciones];
 
-    // Filtrar por curso ID
     if (filtros.cursoId) {
       resultado = resultado.filter(pub => pub.curso?.id === parseInt(filtros.cursoId));
     }
 
-    // Filtrar por profesor ID
     if (filtros.profesorId) {
       resultado = resultado.filter(pub => pub.profesor?.id === parseInt(filtros.profesorId));
     }
 
-    // Filtrar por nombre de curso (búsqueda)
     if (filtros.nombreCurso.trim()) {
       resultado = resultado.filter(pub =>
-        pub.curso?.nombre.toLowerCase().includes(filtros.nombreCurso.toLowerCase())
+        pub.curso?.nombre?.toLowerCase().includes(filtros.nombreCurso.toLowerCase())
       );
     }
 
-    // Filtrar por nombre de profesor (búsqueda)
     if (filtros.nombreProfesor.trim()) {
       resultado = resultado.filter(pub =>
-        `${pub.profesor?.nombres} ${pub.profesor?.apellidos}`
+        `${pub.profesor?.nombres || ''} ${pub.profesor?.apellidos || ''}`
           .toLowerCase()
           .includes(filtros.nombreProfesor.toLowerCase())
       );
     }
 
-    // Ordenar por fecha (más recientes primero)
+    //ORDENAR POR FECHA (más recientes primero)
     resultado.sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion));
 
     setPublicacionesFiltradas(resultado);
@@ -141,32 +146,32 @@ function HomePage() {
   };
 
   if (cargando) {
-    return <div className="home-page"><p className="loading">Cargando publicaciones...</p></div>;
+    return (
+      <div className="home-page">
+        <p className="loading">Cargando publicaciones...</p>
+      </div>
+    );
   }
 
   return (
     <div className="home-page">
+
       <div className="home-header">
         <h1>Publicaciones</h1>
-        <p>Aquí puedes ver todas las publicaciones de la comunidad. Usa los filtros para buscar lo que te interesa.</p>
+        <p>Explora lo que está pasando en la comunidad.</p>
       </div>
 
-      {/* Sección de filtros */}
+      {/* FILTROS */}
       <div className="filtros-section">
         <div className="filtros-container">
           <h3>Filtros de Búsqueda</h3>
 
           <div className="filtros-grid">
-            {/* Filtro por curso */}
+
             <div className="filtro-group">
-              <label htmlFor="cursoId">Filtrar por Curso:</label>
-              <select
-                id="cursoId"
-                name="cursoId"
-                value={filtros.cursoId}
-                onChange={handleFiltroChange}
-              >
-                <option value="">Todos los cursos</option>
+              <label>Curso:</label>
+              <select name="cursoId" value={filtros.cursoId} onChange={handleFiltroChange}>
+                <option value="">Todos</option>
                 {cursos.map(curso => (
                   <option key={curso.id} value={curso.id}>
                     {curso.nombre}
@@ -175,49 +180,38 @@ function HomePage() {
               </select>
             </div>
 
-            {/* Filtro por profesor */}
             <div className="filtro-group">
-              <label htmlFor="profesorId">Filtrar por Catedrático:</label>
-              <select
-                id="profesorId"
-                name="profesorId"
-                value={filtros.profesorId}
-                onChange={handleFiltroChange}
-              >
-                <option value="">Todos los catedráticos</option>
-                {profesores.map(profesor => (
-                  <option key={profesor.id} value={profesor.id}>
-                    {profesor.nombres} {profesor.apellidos}
+              <label>Catedrático:</label>
+              <select name="profesorId" value={filtros.profesorId} onChange={handleFiltroChange}>
+                <option value="">Todos</option>
+                {profesores.map(prof => (
+                  <option key={prof.id} value={prof.id}>
+                    {prof.nombres} {prof.apellidos}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Búsqueda por nombre de curso */}
             <div className="filtro-group">
-              <label htmlFor="nombreCurso">Buscar Curso por Nombre:</label>
+              <label>Buscar Curso:</label>
               <input
-                id="nombreCurso"
-                type="text"
                 name="nombreCurso"
-                placeholder="Ej: Programación, Matemáticas..."
                 value={filtros.nombreCurso}
                 onChange={handleFiltroChange}
+                placeholder="Ej: Programación"
               />
             </div>
 
-            {/* Búsqueda por nombre de profesor */}
             <div className="filtro-group">
-              <label htmlFor="nombreProfesor">Buscar Catedrático por Nombre:</label>
+              <label>Buscar Catedrático:</label>
               <input
-                id="nombreProfesor"
-                type="text"
                 name="nombreProfesor"
-                placeholder="Ej: García, López..."
                 value={filtros.nombreProfesor}
                 onChange={handleFiltroChange}
+                placeholder="Ej: García"
               />
             </div>
+
           </div>
 
           <button className="btn-limpiar" onClick={limpiarFiltros}>
@@ -226,29 +220,23 @@ function HomePage() {
         </div>
       </div>
 
-      {/* Sección de publicaciones */}
+      {/* PUBLICACIONES */}
       <div className="publicaciones-section">
         <div className="publicaciones-info">
           <p className="result-count">
             {publicacionesFiltradas.length === 0
-              ? 'No se encontraron publicaciones con los filtros seleccionados'
-              : `Se encontraron ${publicacionesFiltradas.length} publicación(es)`}
+              ? 'No hay publicaciones'
+              : `${publicacionesFiltradas.length} publicación(es)`}
           </p>
         </div>
 
         <div className="publicaciones-list">
-          {publicacionesFiltradas.length > 0 ? (
-            publicacionesFiltradas.map(publicacion => (
-              <PublicationCard key={publicacion.id} publicacion={publicacion} />
-            ))
-          ) : (
-            <div className="empty-state">
-              <p>No hay publicaciones que mostrar</p>
-              <p className="empty-text">Intenta con otros filtros o sé el primero en publicar algo.</p>
-            </div>
-          )}
+          {publicacionesFiltradas.map(pub => (
+            <PublicationCard key={pub.id} publicacion={pub} />
+          ))}
         </div>
       </div>
+
     </div>
   );
 }

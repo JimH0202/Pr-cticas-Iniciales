@@ -4,12 +4,14 @@ import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import HomePage from './pages/HomePage';
 import Navbar from './components/Navbar';
+import CreatePublicationPage from './pages/CreatePublicationPage';
 
 function App() {
   const [user, setUser] = useState(null);
   const [page, setPage] = useState('login'); // control de navegación (login, register, forgot)
   const [currentPage, setCurrentPage] = useState('home'); // control de páginas después del login (home, createPublication, myProfile, userProfile)
   const [searchedUserId, setSearchedUserId] = useState(null); // Para el perfil de usuario buscado
+const [publicaciones, setPublicaciones] = useState([]); // Estado para almacenar publicaciones y conectarlas directamente en homePage
 
   const handleLoginSuccess = (loggedUser, token) => {
     setUser(loggedUser);
@@ -33,6 +35,11 @@ function App() {
     setSearchedUserId(userId);
     setCurrentPage('userProfile');
   };
+
+  const handleCreatePost = (newPost) => {
+  setPublicaciones(prev => [newPost, ...prev]); // lo pone arriba (más reciente)
+  setCurrentPage('home'); // redirige automáticamente
+};
 
   // Pantalla de autenticación (login, register, forgot password)
   if (!user) {
@@ -75,13 +82,15 @@ function App() {
         onSearchUser={handleSearchUser}
       />
 
-      {currentPage === 'home' && <HomePage />}
+      {currentPage === 'home' && (
+        <HomePage publicacionesExternas={publicaciones} />
+      )}
 
       {currentPage === 'createPublication' && (
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
-          <h2>Crear Publicación</h2>
-          <p>Por implementar: formulario para crear publicaciones</p>
-        </div>
+         <CreatePublicationPage 
+          user={user}
+          onCreate={handleCreatePost}
+        />
       )}
 
       {currentPage === 'myProfile' && (
