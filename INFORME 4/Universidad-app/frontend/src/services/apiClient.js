@@ -52,3 +52,36 @@ export async function register({ registro, nombres, apellidos, password, email }
   // const response = await axios.post(`${API_BASE_URL}/auth/register`, { registro, nombres, apellidos, password, email });
   // return response.data;
 }
+
+export async function fetchPublicaciones(token, filters = {}) {
+  if (USE_MOCK) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return { publicaciones: mockPublicaciones };
+  }
+
+  // Código real
+  // const response = await axios.get(`${API_BASE_URL}/publicaciones`, { headers: { Authorization: `Bearer ${token}` }, params: filters });
+  // return response.data;
+}
+
+export async function createComentario(token, publicacionId, mensaje) {
+  if (USE_MOCK) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return { comentario: { id: Date.now(), mensaje, usuario: { nombres: 'Usuario', apellidos: 'Mock' }, fechaCreacion: new Date() } };
+  }
+
+  // Código real
+  // const response = await axios.post(`${API_BASE_URL}/comentarios/${publicacionId}`, { mensaje }, { headers: { Authorization: `Bearer ${token}` } });
+  // return response.data;
+}
+
+export async function fetchComentarios(token, publicacionId) {
+  if (USE_MOCK) {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return { comentarios: [] }; // Mock vacío por simplicidad
+  }
+
+  // Código real
+  // const response = await axios.get(`${API_BASE_URL}/comentarios/${publicacionId}`, { headers: { Authorization: `Bearer ${token}` } });
+  // return response.data;
+}

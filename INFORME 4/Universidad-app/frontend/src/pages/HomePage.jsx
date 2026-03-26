@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PublicationCard from '../components/PublicationCard';
 import '../styles.css';
 
-function HomePage({ publicaciones }) {
+function HomePage({ publicaciones, token }) {
 
   const [filtros, setFiltros] = useState({
     cursoId: '',
@@ -126,7 +126,7 @@ function HomePage({ publicaciones }) {
 
           <div className="filtros-grid">
 
-            {/* 🔽 DROPDOWN CURSOS */}
+            {/*CURSOS */}
             <div className="filtro-group">
               <label>Filtrar por Curso:</label>
               <select
@@ -200,11 +200,12 @@ function HomePage({ publicaciones }) {
               <PublicationCard
                 key={publicacion.id}
                 publicacion={publicacion}
+                token={token}
               />
             ))
           ) : (
             <div className="empty-state">
-              <p>📭</p>
+              <p>📭</p> //colocado a proposito por el momento en lo que investigo como agregar imagnes e iconos
               <p>Sé el primero en crear una publicación</p>
             </div>
           )}

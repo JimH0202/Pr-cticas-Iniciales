@@ -1,7 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { createComentario, fetchComentarios } from '../services/apiClient';
 import '../styles.css';
 
-function PublicationCard({ publicacion }) {
+function PublicationCard({ publicacion, token }) {
+  const [showComments, setShowComments] = useState(false);
+  const [comentarios, setComentarios] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleCommentClick = async () => {
+    if (!showComments) {
+      // Cargar comentarios
+      if (token) {
+        try {
+          const result = await fetchComentarios(token, publicacion.id);
+          setComentarios(result.comentarios);
+        } catch (error) {
+          console.error('Error fetching comments:', error);
+        }
+      }
+    }
+    setShowComments(!showComments);
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !token) return;
+    setLoading(true);
+    try {
+      const result = await createComentario(token, publicacion.id, newComment);
+      setComentarios([...comentarios, result.comentario]);
+      setNewComment('');
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const formatDate = (date) => {
     const options = { 
       year: 'numeric', 
@@ -54,16 +88,41 @@ function PublicationCard({ publicacion }) {
 
       {/* Acciones */}
       <div className="publication-actions">
-        <button className="action-btn comment-btn" title="Ver comentarios">
-          Comentarios
-        </button>
-        <button className="action-btn likes-btn" title="Me gusta">
-          Me gusta
-        </button>
-        <button className="action-btn share-btn" title="Compartir">
-          Compartir
+        <button 
+          className={`action-btn comment-btn ${showComments ? 'active' : ''}`} 
+          onClick={handleCommentClick} 
+          title="Ver comentarios"
+        >
+          Comentarios ({comentarios.length})
         </button>
       </div>
+
+      {/* Sección de comentarios */}
+      {showComments && (
+        <div className="comments-section">
+          <div className="add-comment">
+            <input
+              type="text"
+              placeholder="Escribe un comentario..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && !loading && handleAddComment()}
+              disabled={loading}
+            />
+            <button onClick={handleAddComment} disabled={!newComment.trim() || loading}>
+              {loading ? '...' : 'Comentar'}
+            </button>
+          </div>
+          <div className="comments-list">
+            {comentarios.map((comentario) => (
+              <div key={comentario.id} className="comment">
+                <strong>{comentario.usuario.nombres} {comentario.usuario.apellidos}:</strong> {comentario.mensaje}
+                <small> - {formatDate(comentario.fechaCreacion)}</small>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

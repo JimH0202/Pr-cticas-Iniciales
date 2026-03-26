@@ -8,6 +8,7 @@ import CreatePublicationPage from './pages/CreatePublicationPage';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('jwtToken') || null);
   const [page, setPage] = useState('login');
   const [currentPage, setCurrentPage] = useState('home');
   const [searchedUserId, setSearchedUserId] = useState(null);
@@ -19,13 +20,16 @@ function App() {
     setCurrentPage('home');
   };
 
-  const handleLoginSuccess = (loggedUser) => {
+  const handleLoginSuccess = (loggedUser, userToken) => {
     setUser(loggedUser);
+    setToken(userToken);
     setCurrentPage('home');
   };
 
   const handleLogout = () => {
     setUser(null);
+    setToken(null);
+    localStorage.removeItem('jwtToken');
     setPage('login');
     setCurrentPage('home');
     setSearchedUserId(null);
@@ -79,7 +83,7 @@ function App() {
       />
 
       {currentPage === 'home' && (
-        <HomePage publicaciones={publicaciones} />
+        <HomePage publicaciones={publicaciones} token={token} />
       )}
 
       {currentPage === 'createPublication' && (
