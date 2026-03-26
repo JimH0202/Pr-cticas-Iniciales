@@ -11,13 +11,26 @@ function CreatePublicationPage({ user, token, onCreate }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!mensaje.trim()) {
+      alert('El mensaje no puede estar vacío');
+      return;
+    }
+
+    if (tipo === 'curso' && !curso.trim()) {
+      alert('Por favor escribe el nombre del curso');
+      return;
+    }
+
+    if (tipo === 'profesor' && !profesor.trim()) {
+      alert('Por favor escribe el nombre del catedrático');
+      return;
+    }
+
     try {
       const result = await createPublicacion(token, user.id, {
-        cursoId: tipo === 'curso' ? 1 : null,
-        profesorId: tipo === 'profesor' ? 1 : null,
-        mensaje,
-        curso,
-        profesor
+        cursoNombre: tipo === 'curso' ? curso.trim() : null,
+        profesorNombre: tipo === 'profesor' ? profesor.trim() : null,
+        mensaje
       }, user);
 
       onCreate(result.publicacion);

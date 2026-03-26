@@ -236,11 +236,11 @@ export async function fetchPublicacionesByUser(token, userId) {
   }
 }
 
-export async function createPublicacion(token, usuarioId, { cursoId, profesorId, mensaje, curso, profesor }, currentUser) {
+export async function createPublicacion(token, usuarioId, { cursoNombre, profesorNombre, mensaje }, currentUser) {
   try {
     const response = await axiosInstance.post('/publicaciones', {
-      cursoId,
-      profesorId,
+      cursoNombre,
+      profesorNombre,
       mensaje
     });
     

@@ -30,6 +30,14 @@ const findById = async (id) => {
   return rows[0];
 };
 
+const findByName = async (nombre) => {
+  const [rows] = await pool.query(
+    'SELECT * FROM cursos WHERE LOWER(nombre) LIKE LOWER(?)',
+    [`%${nombre}%`]
+  );
+  return rows[0];
+};
+
 const create = async ({ nombre, codigo, creditos, profesorId }) => {
   const [result] = await pool.query(
     'INSERT INTO cursos (nombre, codigo, creditos, profesor_id) VALUES (?, ?, ?, ?)',
@@ -41,5 +49,6 @@ const create = async ({ nombre, codigo, creditos, profesorId }) => {
 module.exports = {
   findAll,
   findById,
+  findByName,
   create,
 };

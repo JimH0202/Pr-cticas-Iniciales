@@ -52,10 +52,10 @@ const findById = async (id) => {
   return rows[0];
 };
 
-const create = async ({ usuarioId, cursoId, profesorId, mensaje }) => {
+const create = async ({ usuarioId, cursoId, profesorId, cursoNombre, profesorNombre, mensaje }) => {
   const [result] = await pool.query(
-    'INSERT INTO publicaciones (usuario_id, curso_id, profesor_id, mensaje, created_at) VALUES (?, ?, ?, ?, NOW())',
-    [usuarioId, cursoId || null, profesorId || null, mensaje]
+    'INSERT INTO publicaciones (usuario_id, curso_id, profesor_id, curso_nombre_text, profesor_nombre_text, mensaje, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+    [usuarioId, cursoId || null, profesorId || null, cursoNombre || null, profesorNombre || null, mensaje]
   );
   return findById(result.insertId);
 };

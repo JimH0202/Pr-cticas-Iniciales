@@ -16,15 +16,15 @@ const sanitizePublicacion = (publicacion) => {
       nombres: publicacion.usuario_nombres || '',
       apellidos: publicacion.usuario_apellidos || ''
     },
-    curso: publicacion.curso_id ? {
-      id: publicacion.curso_id,
-      nombre: publicacion.curso_nombre || '',
+    curso: publicacion.curso_id || publicacion.curso_nombre_text ? {
+      id: publicacion.curso_id || null,
+      nombre: publicacion.curso_nombre_text || publicacion.curso_nombre || '',
       codigo: publicacion.curso_codigo || ''
     } : null,
-    profesor: publicacion.profesor_id ? {
-      id: publicacion.profesor_id,
-      nombres: publicacion.profesor_nombres || '',
-      apellidos: publicacion.profesor_apellidos || ''
+    profesor: publicacion.profesor_id || publicacion.profesor_nombre_text ? {
+      id: publicacion.profesor_id || null,
+      nombres: publicacion.profesor_nombre_text?.split(' ')[0] || publicacion.profesor_nombres || '',
+      apellidos: publicacion.profesor_nombre_text?.split(' ').slice(1).join(' ') || publicacion.profesor_apellidos || ''
     } : null,
     fechaCreacion: publicacion.created_at
   };
@@ -53,8 +53,15 @@ const getPublicacion = async (req, res, next) => {
 const createPublicacion = async (req, res, next) => {
   try {
     const usuarioId = req.user.id;
-    const { cursoId, profesorId, mensaje } = req.body;
-    const publicacion = await publicacionService.createPublicacion({ usuarioId, cursoId, profesorId, mensaje });
+    const { cursoId, profesorId, cursoNombre, profesorNombre, mensaje } = req.body;
+    const publicacion = await publicacionService.createPublicacion({ 
+      usuarioId, 
+      cursoId, 
+      profesorId, 
+      cursoNombre,
+      profesorNombre,
+      mensaje 
+    });
     res.status(201).json({ publicacion: sanitizePublicacion(publicacion) });
   } catch (err) {
     next(err);
