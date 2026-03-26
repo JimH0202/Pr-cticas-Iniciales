@@ -6,6 +6,16 @@ const sanitizeUser = (user) => {
   return { id, registro, nombres, apellidos, email, created_at };
 };
 
+const getProfileById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const usuario = await usuarioService.getProfileById(id);
+    res.json({ usuario: sanitizeUser(usuario) });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const getProfile = async (req, res, next) => {
   try {
     const { registro } = req.params;
@@ -56,6 +66,7 @@ const addApprovedCourse = async (req, res, next) => {
 
 module.exports = {
   getProfile,
+  getProfileById,
   updateProfile,
   getApprovedCourses,
   addApprovedCourse,

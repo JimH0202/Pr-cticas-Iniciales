@@ -3,7 +3,8 @@ const router = express.Router();
 const usuarioController = require('../controllers/usuario.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 
-router.get('/:registro', authenticate, usuarioController.getProfile);
+router.get('/registro/:registro', authenticate, usuarioController.getProfile);
+router.get('/:id', authenticate, usuarioController.getProfileById);
 router.put('/', authenticate, usuarioController.updateProfile);
 
 // Cursos aprobados

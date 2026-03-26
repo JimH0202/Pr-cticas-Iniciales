@@ -8,6 +8,16 @@ const {
 
 const { hashPassword } = require('../utils/hash');
 
+const getProfileById = async (id) => {
+  const usuario = await findById(id);
+  if (!usuario) {
+    const error = new Error('Usuario no encontrado');
+    error.status = 404;
+    throw error;
+  }
+  return usuario;
+};
+
 const getProfileByRegistro = async (registro) => {
   const usuario = await findByRegistro(registro);
   if (!usuario) {
@@ -37,6 +47,7 @@ const addCursoAprobado = async (userId, cursoId) => {
 
 module.exports = {
   getProfileByRegistro,
+  getProfileById,
   updateProfile,
   getCursosAprobados,
   addCursoAprobado,

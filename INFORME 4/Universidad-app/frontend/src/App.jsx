@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import HomePage from './pages/HomePage';
+import UserProfilePage from './pages/UserProfilePage';
 import Navbar from './components/Navbar';
 import CreatePublicationPage from './pages/CreatePublicationPage';
+import { fetchPublicaciones } from './services/apiClient';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -14,6 +16,42 @@ function App() {
   const [searchedUserId, setSearchedUserId] = useState(null);
   const [publicaciones, setPublicaciones] = useState([]);
 
+  // Cargar usuario desde localStorage al iniciar
+  useEffect(() => {
+    const savedToken = localStorage.getItem('jwtToken');
+    const savedUser = localStorage.getItem('user');
+    
+    if (savedToken && savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        setToken(savedToken);
+        setPage('home'); // Cambiar a la página principal si hay usuario guardado
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('jwtToken');
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
+
+  // Cargar publicaciones cuando el usuario se loguea
+  useEffect(() => {
+    if (user && token) {
+      console.log('Loading publications for user:', user);
+      const loadPublicaciones = async () => {
+        try {
+          const data = await fetchPublicaciones(token);
+          console.log('Publications loaded:', data);
+          setPublicaciones(data.publicaciones || []);
+        } catch (error) {
+          console.error('Error cargando publicaciones:', error);
+        }
+      };
+      loadPublicaciones();
+    }
+  }, [user, token]);
+
   // Una función para crear publicaciones
   const handleCreatePost = (newPost) => {
     setPublicaciones(prev => [newPost, ...prev]);
@@ -21,6 +59,7 @@ function App() {
   };
 
   const handleLoginSuccess = (loggedUser, userToken) => {
+    console.log('Login success:', loggedUser, userToken);
     setUser(loggedUser);
     setToken(userToken);
     setCurrentPage('home');
@@ -29,15 +68,23 @@ function App() {
   const handleLogout = () => {
     setUser(null);
     setToken(null);
+    setPublicaciones([]);
     localStorage.removeItem('jwtToken');
+    localStorage.removeItem('user');
     setPage('login');
     setCurrentPage('home');
     setSearchedUserId(null);
   };
 
   const handleNavigate = (destination) => {
-    setCurrentPage(destination);
-    setSearchedUserId(null);
+    if (destination === 'myProfile' && user) {
+      console.log('Navigating to myProfile, user:', user, 'user.id:', user.id);
+      setSearchedUserId(user.id);
+      setCurrentPage('userProfile');
+    } else {
+      setCurrentPage(destination);
+      setSearchedUserId(null);
+    }
   };
 
   const handleSearchUser = (userId) => {
@@ -73,6 +120,7 @@ function App() {
   }
 
   // APP
+  console.log('Rendering app - user:', user, 'currentPage:', currentPage, 'publicaciones:', publicaciones.length);
   return (
     <div className="App">
       <Navbar 
@@ -101,10 +149,12 @@ function App() {
       )}
 
       {currentPage === 'userProfile' && (
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
-          <h2>Perfil del Usuario</h2>
-          <p>ID: {searchedUserId}</p>
-        </div>
+        <UserProfilePage
+          userId={searchedUserId}
+          token={token}
+          currentUser={user}
+          onBack={() => setCurrentPage('home')}
+        />
       )}
     </div>
   );

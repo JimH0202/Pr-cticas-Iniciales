@@ -11,7 +11,7 @@ export async function login({ registro, password }) {
     if (!user) {
       throw { response: { data: { message: 'Usuario o contraseña incorrectos' } } };
     }
-    return { token: 'mock-jwt-token-' + Date.now(), user };
+    return { token: 'mock-jwt-token-' + Date.now(), user: { ...user, id: user.id } };
   }
 
   // Código real con axios (cuando USE_MOCK = false)
@@ -83,5 +83,54 @@ export async function fetchComentarios(token, publicacionId) {
 
   // Código real
   // const response = await axios.get(`${API_BASE_URL}/comentarios/${publicacionId}`, { headers: { Authorization: `Bearer ${token}` } });
+  // return response.data;
+}
+
+export async function searchUserByRegistro(token, registro) {
+  if (USE_MOCK) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const user = mockUsers.find(u => u.registro === registro);
+    if (!user) {
+      throw { response: { data: { message: 'Usuario no encontrado' } } };
+    }
+    return { user };
+  }
+
+  // Código real
+  // const response = await axios.get(`${API_BASE_URL}/usuarios/registro/${registro}`, { headers: { Authorization: `Bearer ${token}` } });
+  // return response.data;
+}
+
+export async function getUserProfile(token, userId) {
+  console.log('getUserProfile called with userId:', userId);
+  if (USE_MOCK) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const user = mockUsers.find(u => u.id === userId);
+    console.log('Found user in mock:', user);
+    if (!user) {
+      throw { response: { data: { message: 'Usuario no encontrado' } } };
+    }
+    return { user };
+  }
+
+  // Código real
+  // const response = await axios.get(`${API_BASE_URL}/usuarios/${userId}`, { headers: { Authorization: `Bearer ${token}` } });
+  // return response.data;
+}
+
+export async function updateUserProfile(token, userId, userData) {
+  if (USE_MOCK) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const userIndex = mockUsers.findIndex(u => u.id === userId);
+    if (userIndex === -1) {
+      throw { response: { data: { message: 'Usuario no encontrado' } } };
+    }
+    // Simular actualización (no persiste)
+    mockUsers[userIndex] = { ...mockUsers[userIndex], ...userData };
+    return { user: mockUsers[userIndex] };
+  }
+
+  // Código real
+  // const response = await axios.put(`${API_BASE_URL}/usuarios/${userId}`, userData, { headers: { Authorization: `Bearer ${token}` } });
   // return response.data;
 }

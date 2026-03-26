@@ -11,11 +11,9 @@ function HomePage({ publicaciones, token }) {
     nombreProfesor: ''
   });
 
-  const [publicacionesFiltradas, setPublicacionesFiltradas] = useState([]);
-
-  // lista
   const [cursos, setCursos] = useState([]);
   const [profesores, setProfesores] = useState([]);
+  const [publicacionesFiltradas, setPublicacionesFiltradas] = useState([]);
 
   //EXTRAER CURSOS Y PROFESORES ÚNICOS
   useEffect(() => {
