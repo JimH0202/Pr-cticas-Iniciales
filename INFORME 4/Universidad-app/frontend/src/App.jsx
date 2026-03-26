@@ -41,7 +41,6 @@ function App() {
     if (user && token) {
       try {
         const data = await fetchPublicaciones(token);
-        console.log('Publications loaded:', data);
         setPublicaciones(data.publicaciones || []);
       } catch (error) {
         console.error('Error cargando publicaciones:', error);
@@ -51,7 +50,6 @@ function App() {
 
   useEffect(() => {
     if (user && token) {
-      console.log('Loading publications for user:', user);
       loadPublicaciones();
     }
   }, [user, token]);
@@ -63,7 +61,6 @@ function App() {
   };
 
   const handleLoginSuccess = (loggedUser, userToken) => {
-    console.log('Login success:', loggedUser, userToken);
     setUser(loggedUser);
     setToken(userToken);
     setCurrentPage('home');
@@ -82,7 +79,6 @@ function App() {
 
   const handleNavigate = (destination) => {
     if (destination === 'myProfile' && user) {
-      console.log('Navigating to myProfile, user:', user, 'user.id:', user.id);
       setSearchedUserId(user.id);
       setCurrentPage('userProfile');
     } else {
@@ -132,7 +128,6 @@ function App() {
   }
 
   // APP
-  console.log('Rendering app - user:', user, 'currentPage:', currentPage, 'publicaciones:', publicaciones.length);
   return (
     <div className="App">
       <Navbar 

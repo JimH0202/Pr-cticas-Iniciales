@@ -4,7 +4,6 @@ import PublicationCard from '../components/PublicationCard';
 import '../styles.css';
 
 function UserProfilePage({ userId, token, currentUser, onBack, onPublicacionUpdated }) {
-  console.log('UserProfilePage - userId:', userId, 'currentUser:', currentUser);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
