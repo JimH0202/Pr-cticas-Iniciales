@@ -55,16 +55,17 @@ function HomePage({ publicaciones, token, currentUser, onPublicacionUpdated }) {
     let resultado = [...publicaciones];
 
     if (filtros.cursoId) {
-      resultado = resultado.filter(
-        pub =>
-          (pub.curso?.id || pub.curso?.nombre) === filtros.cursoId
-      );
+      resultado = resultado.filter(pub => {
+        const cursoIdNumber = parseInt(filtros.cursoId);
+        return pub.curso?.id === cursoIdNumber || pub.curso?.nombre === filtros.cursoId;
+      });
     }
 
     if (filtros.profesorId) {
       resultado = resultado.filter(pub => {
+        const profesorIdNumber = parseInt(filtros.profesorId);
         const nombreCompleto = `${pub.profesor?.nombres || ''} ${pub.profesor?.apellidos || ''}`;
-        return (pub.profesor?.id || nombreCompleto) === filtros.profesorId;
+        return pub.profesor?.id === profesorIdNumber || nombreCompleto === filtros.profesorId;
       });
     }
 
