@@ -111,13 +111,10 @@ function UserProfilePage({ userId, token, currentUser, onBack, onPublicacionUpda
     try {
       setError('');
       setSuccess('');
-      const cursoConCreditos = {
-        id: selectedCurso.id,
-        nombre: selectedCurso.nombre,
-        creditos: selectedCurso.creditos,
-        profesor: modalFormData.profesor // Usar el profesor ingresado por el usuario
-      };
-      const result = await addCursoAprobado(token, userId, cursoConCreditos);
+      const result = await addCursoAprobado(token, userId, {
+        cursoId: selectedCurso.id,
+        profesor: modalFormData.profesor
+      });
       setUser(result.user);
       setSelectedCurso(null);
       setModalFormData({ cursoId: '', profesor: '' });

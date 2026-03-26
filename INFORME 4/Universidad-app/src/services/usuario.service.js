@@ -4,6 +4,7 @@ const {
   updateUser,
   getApprovedCourses,
   addApprovedCourse,
+  removeApprovedCourse,
 } = require('../repositories/usuario.repository');
 
 const { hashPassword } = require('../utils/hash');
@@ -41,8 +42,12 @@ const getCursosAprobados = async (userId) => {
   return getApprovedCourses(userId);
 };
 
-const addCursoAprobado = async (userId, cursoId) => {
-  return addApprovedCourse(userId, cursoId);
+const addCursoAprobado = async (userId, cursoId, profesorNombre) => {
+  return addApprovedCourse(userId, cursoId, profesorNombre);
+};
+
+const removeCursoAprobado = async (userId, cursoId) => {
+  return removeApprovedCourse(userId, cursoId);
 };
 
 module.exports = {
@@ -51,4 +56,5 @@ module.exports = {
   updateProfile,
   getCursosAprobados,
   addCursoAprobado,
+  removeCursoAprobado,
 };

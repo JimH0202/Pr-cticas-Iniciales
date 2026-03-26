@@ -52,7 +52,7 @@ const updateUser = async (id, { nombres, apellidos, email, passwordHash }) => {
 
 const getApprovedCourses = async (userId) => {
   const [rows] = await pool.query(
-    `SELECT c.id, c.nombre, c.codigo, c.creditos
+    `SELECT c.id, c.nombre, c.codigo, c.creditos, a.profesor_nombre
      FROM cursos_aprobados a
      JOIN cursos c ON a.curso_id = c.id
      WHERE a.usuario_id = ?`,
@@ -61,9 +61,17 @@ const getApprovedCourses = async (userId) => {
   return rows;
 };
 
-const addApprovedCourse = async (userId, cursoId) => {
+const addApprovedCourse = async (userId, cursoId, profesorNombre) => {
   await pool.query(
-    'INSERT IGNORE INTO cursos_aprobados (usuario_id, curso_id, created_at) VALUES (?, ?, NOW())',
+    'INSERT IGNORE INTO cursos_aprobados (usuario_id, curso_id, profesor_nombre, created_at) VALUES (?, ?, ?, NOW())',
+    [userId, cursoId, profesorNombre || null]
+  );
+  return getApprovedCourses(userId);
+};
+
+const removeApprovedCourse = async (userId, cursoId) => {
+  await pool.query(
+    'DELETE FROM cursos_aprobados WHERE usuario_id = ? AND curso_id = ?',
     [userId, cursoId]
   );
   return getApprovedCourses(userId);
@@ -77,4 +85,5 @@ module.exports = {
   updateUser,
   getApprovedCourses,
   addApprovedCourse,
+  removeApprovedCourse,
 };

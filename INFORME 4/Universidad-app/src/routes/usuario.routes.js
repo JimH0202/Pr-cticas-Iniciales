@@ -10,5 +10,6 @@ router.put('/', authenticate, usuarioController.updateProfile);
 // Cursos aprobados
 router.get('/:userId/cursos-aprobados', authenticate, usuarioController.getApprovedCourses);
 router.post('/:userId/cursos-aprobados', authenticate, usuarioController.addApprovedCourse);
+router.delete('/:userId/cursos-aprobados/:cursoId', authenticate, usuarioController.removeApprovedCourse);
 
 module.exports = router;
