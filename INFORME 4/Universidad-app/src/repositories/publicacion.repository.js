@@ -56,8 +56,23 @@ const create = async ({ usuarioId, cursoId, profesorId, mensaje }) => {
   return findById(result.insertId);
 };
 
+const update = async (id, { mensaje }) => {
+  await pool.query(
+    'UPDATE publicaciones SET mensaje = ?, created_at = created_at WHERE id = ?',
+    [mensaje, id]
+  );
+  return findById(id);
+};
+
+const delete_publicacion = async (id) => {
+  await pool.query('DELETE FROM publicaciones WHERE id = ?', [id]);
+  return { success: true };
+};
+
 module.exports = {
   findAll,
   findById,
   create,
+  update,
+  delete: delete_publicacion,
 };

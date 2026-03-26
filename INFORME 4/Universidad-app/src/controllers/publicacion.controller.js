@@ -32,8 +32,33 @@ const createPublicacion = async (req, res, next) => {
   }
 };
 
+const updatePublicacion = async (req, res, next) => {
+  try {
+    const publicacionId = req.params.id;
+    const usuarioId = req.user.id;
+    const { mensaje } = req.body;
+    const publicacion = await publicacionService.updatePublicacion(publicacionId, usuarioId, mensaje);
+    res.json({ publicacion });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deletePublicacion = async (req, res, next) => {
+  try {
+    const publicacionId = req.params.id;
+    const usuarioId = req.user.id;
+    await publicacionService.deletePublicacion(publicacionId, usuarioId);
+    res.json({ message: 'Publicación eliminada exitosamente' });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   listPublicaciones,
   getPublicacion,
   createPublicacion,
+  updatePublicacion,
+  deletePublicacion,
 };

@@ -6,7 +6,7 @@ import HomePage from './pages/HomePage';
 import UserProfilePage from './pages/UserProfilePage';
 import Navbar from './components/Navbar';
 import CreatePublicationPage from './pages/CreatePublicationPage';
-import { fetchPublicaciones } from './services/apiClient';
+import { fetchPublicaciones, searchUserByRegistro } from './services/apiClient';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -15,6 +15,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [searchedUserId, setSearchedUserId] = useState(null);
   const [publicaciones, setPublicaciones] = useState([]);
+  const [searchError, setSearchError] = useState('');
 
   // Cargar usuario desde localStorage al iniciar
   useEffect(() => {
@@ -36,18 +37,21 @@ function App() {
   }, []);
 
   // Cargar publicaciones cuando el usuario se loguea
+  const loadPublicaciones = async () => {
+    if (user && token) {
+      try {
+        const data = await fetchPublicaciones(token);
+        console.log('Publications loaded:', data);
+        setPublicaciones(data.publicaciones || []);
+      } catch (error) {
+        console.error('Error cargando publicaciones:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     if (user && token) {
       console.log('Loading publications for user:', user);
-      const loadPublicaciones = async () => {
-        try {
-          const data = await fetchPublicaciones(token);
-          console.log('Publications loaded:', data);
-          setPublicaciones(data.publicaciones || []);
-        } catch (error) {
-          console.error('Error cargando publicaciones:', error);
-        }
-      };
       loadPublicaciones();
     }
   }, [user, token]);
@@ -87,9 +91,17 @@ function App() {
     }
   };
 
-  const handleSearchUser = (userId) => {
-    setSearchedUserId(userId);
-    setCurrentPage('userProfile');
+  const handleSearchUser = async (registro) => {
+    try {
+      setSearchError('');
+      const result = await searchUserByRegistro(token, registro);
+      setSearchedUserId(result.user.id);
+      setCurrentPage('userProfile');
+    } catch (error) {
+      setSearchError('Usuario no encontrado');
+      setSearchedUserId(null);
+      setTimeout(() => setSearchError(''), 3000);
+    }
   };
 
   // LOGIN / AUTH
@@ -129,14 +141,26 @@ function App() {
         onNavigate={handleNavigate}
         onSearchUser={handleSearchUser}
       />
+      
+      {searchError && (
+        <div className="search-error-banner">
+          {searchError}
+        </div>
+      )}
 
       {currentPage === 'home' && (
-        <HomePage publicaciones={publicaciones} token={token} />
+        <HomePage 
+          publicaciones={publicaciones} 
+          token={token}
+          currentUser={user}
+          onPublicacionUpdated={loadPublicaciones}
+        />
       )}
 
       {currentPage === 'createPublication' && (
         <CreatePublicationPage 
           user={user}
+          token={token}
           onCreate={handleCreatePost}
         />
       )}
@@ -154,6 +178,7 @@ function App() {
           token={token}
           currentUser={user}
           onBack={() => setCurrentPage('home')}
+          onPublicacionUpdated={loadPublicaciones}
         />
       )}
     </div>

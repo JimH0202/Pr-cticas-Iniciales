@@ -3,14 +3,14 @@ import '../styles.css';
 
 function Navbar({ user, onLogout, onNavigate, onSearchUser }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [showSearchMenu, setShowSearchMenu] = useState(false);
+  const [searchError, setSearchError] = useState('');
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      setSearchError('');
       onSearchUser(searchQuery);
       setSearchQuery('');
-      setShowSearchMenu(false);
     }
   };
 
@@ -50,30 +50,19 @@ function Navbar({ user, onLogout, onNavigate, onSearchUser }) {
           </li>
         </ul>
 
-        {/* Buscador de usuarios */}
-        <div className="navbar-search">
-          <button
-            className="search-toggle"
-            onClick={() => setShowSearchMenu(!showSearchMenu)}
-            title="Buscar usuario"
-          >
+        {/* Buscador de usuarios - INTEGRADO EN NAVBAR */}
+        <form onSubmit={handleSearchSubmit} className="navbar-search">
+          <input
+            type="text"
+            placeholder="Buscar usuario (Registro Personal)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input-navbar"
+          />
+          <button type="submit" className="search-btn-navbar">
             Buscar
           </button>
-          {showSearchMenu && (
-            <form onSubmit={handleSearchSubmit} className="search-form">
-              <input
-                type="text"
-                placeholder="Buscar usuario (Registro Personal)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-              <button type="submit" className="search-btn">
-                Buscar
-              </button>
-            </form>
-          )}
-        </div>
+        </form>
 
         {/* Información del usuario y logout */}
         <div className="navbar-user-info">

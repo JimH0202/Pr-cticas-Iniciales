@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PublicationCard from '../components/PublicationCard';
 import '../styles.css';
 
-function HomePage({ publicaciones, token }) {
+function HomePage({ publicaciones, token, currentUser, onPublicacionUpdated }) {
 
   const [filtros, setFiltros] = useState({
     cursoId: '',
@@ -199,11 +199,14 @@ function HomePage({ publicaciones, token }) {
                 key={publicacion.id}
                 publicacion={publicacion}
                 token={token}
+                currentUserId={currentUser?.id}
+                onPublicacionUpdated={onPublicacionUpdated}
+                enableEditing={false}
               />
             ))
           ) : (
             <div className="empty-state">
-              <p>📭</p> //colocado a proposito por el momento en lo que investigo como agregar imagnes e iconos
+              <p>📭</p>
               <p>Sé el primero en crear una publicación</p>
             </div>
           )}

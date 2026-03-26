@@ -1,30 +1,35 @@
 import React, { useState } from 'react';
+import { createPublicacion } from '../services/apiClient';
 import '../styles.css';
 
-function CreatePublicationPage({ user, onCreate }) {
+function CreatePublicationPage({ user, token, onCreate }) {
   const [tipo, setTipo] = useState('curso'); // curso o profesor
   const [curso, setCurso] = useState('');
   const [profesor, setProfesor] = useState('');
   const [mensaje, setMensaje] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const nuevaPublicacion = {
-      id: Date.now(),
-      usuario: user,
-      curso: tipo === 'curso' ? { nombre: curso } : null,
-      profesor: tipo === 'profesor' ? { nombres: profesor, apellidos: '' } : null,
-      mensaje,
-      fechaCreacion: new Date()
-    };
+    try {
+      const result = await createPublicacion(token, user.id, {
+        cursoId: tipo === 'curso' ? 1 : null,
+        profesorId: tipo === 'profesor' ? 1 : null,
+        mensaje,
+        curso,
+        profesor
+      }, user);
 
-    onCreate(nuevaPublicacion);
+      onCreate(result.publicacion);
 
-    // limpiar
-    setCurso('');
-    setProfesor('');
-    setMensaje('');
+      // limpiar
+      setCurso('');
+      setProfesor('');
+      setMensaje('');
+    } catch (error) {
+      console.error('Error al crear publicación:', error);
+      alert('Error al crear la publicación');
+    }
   };
 
  return (

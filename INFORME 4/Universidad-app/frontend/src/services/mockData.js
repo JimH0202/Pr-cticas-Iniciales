@@ -1,7 +1,34 @@
-export const mockUsers = [
-  { id: 1, registro: 'est_2024001', password: 'admin123', nombres: 'Jimmy', apellidos: 'García', email: 'jimmy@universidad.edu', created_at: '2024-01-15T10:00:00Z' },
-  { id: 2, registro: 'prof_001', password: 'prof123', nombres: 'Brian', apellidos: 'Rodríguez', email: 'brian@universidad.edu', created_at: '2023-08-01T09:00:00Z' },
+// Usuarios iniciales
+const initialMockUsers = [
+  { id: 1, registro: 'est_2024001', password: 'admin123', nombres: 'Jimmy', apellidos: 'García', email: 'jimmy@universidad.edu', created_at: '2024-01-15T10:00:00Z', cursosAprobados: [] },
+  { id: 2, registro: 'prof_001', password: 'prof123', nombres: 'Brian', apellidos: 'Rodríguez', email: 'brian@universidad.edu', created_at: '2023-08-01T09:00:00Z', cursosAprobados: [] },
 ];
+
+// Función helper para obtener usuarios desde localStorage o iniciales
+export const getStoredUsers = () => {
+  if (typeof window === 'undefined') {
+    return initialMockUsers;
+  }
+  const stored = localStorage.getItem('mockUsers');
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch (e) {
+      return initialMockUsers;
+    }
+  }
+  return initialMockUsers;
+};
+
+// Función para guardar usuarios en localStorage
+export const saveStoredUsers = (users) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('mockUsers', JSON.stringify(users));
+  }
+};
+
+// mockUsers es dinámico, se carga desde localStorage
+export let mockUsers = getStoredUsers();
 
 export const mockCursos = [
   { id: 1, nombre: 'Matemáticas Avanzadas', creditos: 4, profesor: 'Dr. García' },
@@ -35,3 +62,14 @@ export const mockPublicaciones = [
     isLiked: false
   },
 ];
+
+export const mockComentarios = {
+  1: [
+    { id: 1, mensaje: 'Yo tengo los apuntes de la clase pasada', usuario: { nombres: 'Brian', apellidos: 'Rodríguez' }, fechaCreacion: '2026-03-20T15:00:00Z' }
+  ],
+  2: [],
+  3: [
+    { id: 2, mensaje: 'Excelente recomendación, muy útil', usuario: { nombres: 'Carlos', apellidos: 'López' }, fechaCreacion: '2026-03-18T12:30:00Z' },
+    { id: 3, mensaje: 'Ya lo tengo, es muy bueno', usuario: { nombres: 'María', apellidos: 'García' }, fechaCreacion: '2026-03-18T13:00:00Z' }
+  ]
+};
