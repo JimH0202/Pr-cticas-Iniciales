@@ -1,319 +1,366 @@
-import { mockUsers, mockCursos, mockPublicaciones, mockComentarios, getStoredUsers, saveStoredUsers } from './mockData';
+import axios from 'axios';
+import config from '../config/config';
 
-const USE_MOCK = true; // Cambiar a false cuando conecte con el backend real
+const API_BASE_URL = config.api.baseURL;
+
+// Crear instancia de axios
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: config.api.timeout || 10000,
+});
+
+// Interceptor para agregar el token JWT a todas las solicitudes
+axiosInstance.interceptors.request.use(
+  (configAxios) => {
+    const token = localStorage.getItem(config.storage.token);
+    if (token) {
+      configAxios.headers.Authorization = `Bearer ${token}`;
+    }
+    return configAxios;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Interceptor para manejar errores de autenticación
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expirado o inválido - limpiar localStorage y redirigir a login
+      localStorage.removeItem(config.storage.token);
+      localStorage.removeItem(config.storage.user);
+      window.location.href = '/';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// ======================== AUTENTICACIÓN ========================
 
 export async function login({ registro, password }) {
-  if (USE_MOCK) {
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Cargar usuarios desde localStorage
-    const storedUsers = getStoredUsers();
-    const user = storedUsers.find(u => u.registro === registro && u.password === password);
-    if (!user) {
-      throw { response: { data: { message: 'Usuario o contraseña incorrectos' } } };
-    }
-    return { token: 'mock-jwt-token-' + Date.now(), user: { ...user, id: user.id } };
+  try {
+    const response = await axiosInstance.post('/auth/login', { registro, password });
+    
+    // Guardar token y usuario en localStorage
+    localStorage.setItem(config.storage.token, response.data.token);
+    localStorage.setItem(config.storage.user, JSON.stringify(response.data.user));
+    
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error en login';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
   }
-
-  // Código real con axios (cuando USE_MOCK = false)
-  // const response = await axios.post(`${API_BASE_URL}/auth/login`, { registro, password });
-  // return response.data;
-}
-
-export async function fetchCursos(token) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return mockCursos;
-  }
-
-  // Código real
-  // const response = await axios.get(`${API_BASE_URL}/cursos`, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
 }
 
 export async function register({ registro, nombres, apellidos, password, email }) {
-  if (USE_MOCK) {
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Cargar usuarios desde localStorage
-    const storedUsers = getStoredUsers();
-
-    // Verificar si el registro ya existe
-    const existingUser = storedUsers.find(u => u.registro === registro || u.email === email);
-    if (existingUser) {
-      throw { response: { data: { message: 'Registro académico o email ya existe' } } };
+  try {
+    const response = await axiosInstance.post('/auth/register', {
+      registro,
+      nombres,
+      apellidos,
+      password,
+      email
+    });
+    
+    // Opcionalmente guardar token si el backend lo devuelve
+    if (response.data.token) {
+      localStorage.setItem(config.storage.token, response.data.token);
+      localStorage.setItem(config.storage.user, JSON.stringify(response.data.user));
     }
-
-    // Generar ID automático para el nuevo usuario
-    const newId = Math.max(...storedUsers.map(u => u.id || 0), 0) + 1;
-
-    // Agregar nuevo usuario con ID
-    const newUser = { 
-      id: newId, 
-      registro, 
-      nombres, 
-      apellidos, 
-      password, 
-      email,
-      created_at: new Date().toISOString()
+    
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error en registro';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
     };
-    storedUsers.push(newUser);
-
-    // Guardar en localStorage
-    saveStoredUsers(storedUsers);
-
-    // Actualizar el array en memoria
-    mockUsers.length = 0;
-    mockUsers.push(...storedUsers);
-
-    return { message: 'Usuario registrado exitosamente', user: newUser };
   }
-
-  // Código real con axios (cuando USE_MOCK = false)
-  // const response = await axios.post(`${API_BASE_URL}/auth/register`, { registro, nombres, apellidos, password, email });
-  // return response.data;
 }
 
-export async function fetchPublicaciones(token, filters = {}) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return { publicaciones: mockPublicaciones };
-  }
-
-  // Código real
-  // const response = await axios.get(`${API_BASE_URL}/publicaciones`, { headers: { Authorization: `Bearer ${token}` }, params: filters });
-  // return response.data;
-}
-
-export async function fetchPublicacionesByUser(token, userId) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return { publicaciones: mockPublicaciones.filter(pub => pub.usuario?.id === Number(userId)) };
-  }
-
-  // Código real
-  // const response = await axios.get(`${API_BASE_URL}/publicaciones`, { headers: { Authorization: `Bearer ${token}` }, params: { usuarioId: userId } });
-  // return response.data;
-}
-
-export async function createComentario(token, publicacionId, mensaje) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const newComentario = {
-      id: Date.now(),
-      mensaje,
-      usuario: { nombres: 'Usuario', apellidos: 'Mock' },
-      fechaCreacion: new Date().toISOString()
+export async function forgotPassword(email) {
+  try {
+    const response = await axiosInstance.post('/auth/forgot-password', { email });
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al recuperar contraseña';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
     };
-    if (!mockComentarios[publicacionId]) {
-      mockComentarios[publicacionId] = [];
-    }
-    mockComentarios[publicacionId].push(newComentario);
-    return { comentario: newComentario };
   }
-
-  // Código real
-  // const response = await axios.post(`${API_BASE_URL}/comentarios/${publicacionId}`, { mensaje }, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
 }
 
-export async function fetchComentarios(token, publicacionId) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    return { comentarios: mockComentarios[publicacionId] || [] };
-  }
+// ======================== USUARIOS ========================
 
-  // Código real
-  // const response = await axios.get(`${API_BASE_URL}/comentarios/${publicacionId}`, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
+export async function getUserProfile(token, userId) {
+  try {
+    const response = await axiosInstance.get(`/usuarios/${userId}`);
+    return { user: response.data };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Usuario no encontrado';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
+  }
 }
 
 export async function searchUserByRegistro(token, registro) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const storedUsers = getStoredUsers();
-    const user = storedUsers.find(u => u.registro === registro);
-    if (!user) {
-      throw { response: { data: { message: 'Usuario no encontrado' } } };
-    }
-    return { user };
-  }
-
-  // Código real
-  // const response = await axios.get(`${API_BASE_URL}/usuarios/registro/${registro}`, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
-}
-
-export async function getUserProfile(token, userId) {
-  console.log('getUserProfile called with userId:', userId);
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const storedUsers = getStoredUsers();
-    const user = storedUsers.find(u => u.id === userId);
-    console.log('Found user in mock:', user);
-    if (!user) {
-      throw { response: { data: { message: 'Usuario no encontrado' } } };
-    }
-    return { user };
-  }
-
-  // Código real
-  // const response = await axios.get(`${API_BASE_URL}/usuarios/${userId}`, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
-}
-
-export async function createPublicacion(token, usuarioId, { cursoId, profesorId, mensaje, curso, profesor }, currentUser) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const newPublicacion = {
-      id: Date.now(),
-      usuario: { id: currentUser.id, registro: currentUser.registro, nombres: currentUser.nombres, apellidos: currentUser.apellidos },
-      curso: cursoId ? { id: cursoId, nombre: curso } : null,
-      profesor: profesorId ? { id: profesorId, nombres: profesor, apellidos: '' } : null,
-      mensaje,
-      fechaCreacion: new Date().toISOString(),
-      likesCount: 0,
-      isLiked: false
+  try {
+    const response = await axiosInstance.get(`/usuarios/registro/${registro}`);
+    return { user: response.data };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Usuario no encontrado';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
     };
-    mockPublicaciones.unshift(newPublicacion);
-    return { publicacion: newPublicacion };
   }
-
-  // Código real
-  // const response = await axios.post(`${API_BASE_URL}/publicaciones`, { cursoId, profesorId, mensaje }, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
 }
 
 export async function updateUserProfile(token, userId, userData) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
+  try {
+    const response = await axiosInstance.put('/usuarios', userData);
     
-    // Cargar usuarios desde localStorage
-    const storedUsers = getStoredUsers();
-    const userIndex = storedUsers.findIndex(u => u.id === userId);
-    if (userIndex === -1) {
-      throw { response: { data: { message: 'Usuario no encontrado' } } };
-    }
+    // Actualizar usuario en localStorage
+    localStorage.setItem(config.storage.user, JSON.stringify(response.data.user));
     
-    // Actualizar usuario
-    storedUsers[userIndex] = { ...storedUsers[userIndex], ...userData };
-    
-    // Guardar en localStorage
-    saveStoredUsers(storedUsers);
-    
-    // Actualizar el array en memoria
-    mockUsers.length = 0;
-    mockUsers.push(...storedUsers);
-    
-    // Actualizar también las publicaciones del usuario con los datos nuevos
-    mockPublicaciones.forEach(pub => {
-      if (pub.usuario.id === userId) {
-        pub.usuario = { ...storedUsers[userIndex], id: userId };
-      }
-    });
-    
-    return { user: storedUsers[userIndex] };
+    return { user: response.data.user };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al actualizar perfil';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
   }
-
-  // Código real
-  // const response = await axios.put(`${API_BASE_URL}/usuarios/${userId}`, userData, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
 }
 
-export async function updatePublicacion(token, publicacionId, mensaje) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const publicacion = mockPublicaciones.find(p => p.id === publicacionId);
-    if (!publicacion) {
-      throw { response: { data: { message: 'Publicación no encontrada' } } };
-    }
-    publicacion.mensaje = mensaje;
-    return { publicacion };
+export async function getApprovedCourses(token, userId) {
+  try {
+    const response = await axiosInstance.get(`/usuarios/${userId}/cursos-aprobados`);
+    return { cursosAprobados: response.data };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al obtener cursos aprobados';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
   }
-
-  // Código real
-  // const response = await axios.put(`${API_BASE_URL}/publicaciones/${publicacionId}`, { mensaje }, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
 }
 
-export async function deletePublicacion(token, publicacionId) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = mockPublicaciones.findIndex(p => p.id === publicacionId);
-    if (index === -1) {
-      throw { response: { data: { message: 'Publicación no encontrada' } } };
-    }
-    mockPublicaciones.splice(index, 1);
-    return { message: 'Publicación eliminada exitosamente' };
-  }
-
-  // Código real
-  // const response = await axios.delete(`${API_BASE_URL}/publicaciones/${publicacionId}`, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
-}
-
-// Funciones para Cursos Aprobados
 export async function addCursoAprobado(token, userId, cursoAprobado) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const storedUsers = getStoredUsers();
-    const userIndex = storedUsers.findIndex(u => u.id === userId);
-    if (userIndex === -1) {
-      throw { response: { data: { message: 'Usuario no encontrado' } } };
+  try {
+    const response = await axiosInstance.post(
+      `/usuarios/${userId}/cursos-aprobados`,
+      cursoAprobado
+    );
+    
+    // Actualizar usuario en localStorage
+    if (response.data.user) {
+      localStorage.setItem(config.storage.user, JSON.stringify(response.data.user));
     }
     
-    // Verificar si el curso ya está aprobado
-    if (!storedUsers[userIndex].cursosAprobados) {
-      storedUsers[userIndex].cursosAprobados = [];
-    }
-    
-    const cursoYaAprobado = storedUsers[userIndex].cursosAprobados.find(c => c.id === cursoAprobado.id);
-    if (cursoYaAprobado) {
-      throw { response: { data: { message: 'Este curso ya está en tu lista de aprobados' } } };
-    }
-    
-    storedUsers[userIndex].cursosAprobados.push(cursoAprobado);
-    saveStoredUsers(storedUsers);
-    mockUsers.length = 0;
-    mockUsers.push(...storedUsers);
-    
-    return { user: storedUsers[userIndex] };
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al agregar curso aprobado';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
   }
-
-  // Código real
-  // const response = await axios.post(`${API_BASE_URL}/usuarios/${userId}/cursos-aprobados`, cursoAprobado, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
 }
 
 export async function removeCursoAprobado(token, userId, cursoId) {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const storedUsers = getStoredUsers();
-    const userIndex = storedUsers.findIndex(u => u.id === userId);
-    if (userIndex === -1) {
-      throw { response: { data: { message: 'Usuario no encontrado' } } };
+  try {
+    const response = await axiosInstance.delete(
+      `/usuarios/${userId}/cursos-aprobados/${cursoId}`
+    );
+    
+    // Actualizar usuario en localStorage
+    if (response.data.user) {
+      localStorage.setItem(config.storage.user, JSON.stringify(response.data.user));
     }
     
-    if (!storedUsers[userIndex].cursosAprobados) {
-      storedUsers[userIndex].cursosAprobados = [];
-    }
-    
-    const cursoIndex = storedUsers[userIndex].cursosAprobados.findIndex(c => c.id === cursoId);
-    if (cursoIndex === -1) {
-      throw { response: { data: { message: 'Curso no encontrado en tu lista' } } };
-    }
-    
-    storedUsers[userIndex].cursosAprobados.splice(cursoIndex, 1);
-    saveStoredUsers(storedUsers);
-    mockUsers.length = 0;
-    mockUsers.push(...storedUsers);
-    
-    return { user: storedUsers[userIndex] };
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al eliminar curso aprobado';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
   }
+}
 
-  // Código real
-  // const response = await axios.delete(`${API_BASE_URL}/usuarios/${userId}/cursos-aprobados/${cursoId}`, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
+// ======================== PUBLICACIONES ========================
+
+export async function fetchPublicaciones(token, filters = {}) {
+  try {
+    const response = await axiosInstance.get('/publicaciones', { params: filters });
+    return { publicaciones: response.data };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al obtener publicaciones';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
+  }
+}
+
+export async function fetchPublicacionesByUser(token, userId) {
+  try {
+    const response = await axiosInstance.get('/publicaciones', {
+      params: { usuarioId: userId }
+    });
+    return { publicaciones: response.data };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al obtener publicaciones del usuario';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
+  }
+}
+
+export async function createPublicacion(token, usuarioId, { cursoId, profesorId, mensaje, curso, profesor }, currentUser) {
+  try {
+    const response = await axiosInstance.post('/publicaciones', {
+      cursoId,
+      profesorId,
+      mensaje
+    });
+    
+    return { publicacion: response.data };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al crear publicación';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
+  }
+}
+
+export async function updatePublicacion(token, publicacionId, mensaje) {
+  try {
+    const response = await axiosInstance.put(`/publicaciones/${publicacionId}`, {
+      mensaje
+    });
+    
+    return { publicacion: response.data };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al actualizar publicación';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
+  }
+}
+
+export async function deletePublicacion(token, publicacionId) {
+  try {
+    const response = await axiosInstance.delete(`/publicaciones/${publicacionId}`);
+    return { message: 'Publicación eliminada exitosamente' };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al eliminar publicación';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
+  }
+}
+
+// ======================== COMENTARIOS ========================
+
+export async function fetchComentarios(token, publicacionId) {
+  try {
+    const response = await axiosInstance.get(`/comentarios/${publicacionId}`);
+    return { comentarios: response.data };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al obtener comentarios';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
+  }
+}
+
+export async function createComentario(token, publicacionId, mensaje) {
+  try {
+    const response = await axiosInstance.post(`/comentarios/${publicacionId}`, {
+      mensaje
+    });
+    
+    return { comentario: response.data };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al crear comentario';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
+  }
+}
+
+// ======================== CURSOS ========================
+
+export async function fetchCursos(token) {
+  try {
+    const response = await axiosInstance.get('/cursos');
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al obtener cursos';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
+  }
+}
+
+export async function getCurso(token, cursoId) {
+  try {
+    const response = await axiosInstance.get(`/cursos/${cursoId}`);
+    return { curso: response.data };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Curso no encontrado';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
+  }
+}
+
+// ======================== PROFESORES ========================
+
+export async function fetchProfesores(token) {
+  try {
+    const response = await axiosInstance.get('/profesores');
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || 'Error al obtener profesores';
+    throw { 
+      response: { 
+        data: { message } 
+      } 
+    };
+  }
 }

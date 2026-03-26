@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth.routes');
 const usuarioRoutes = require('./routes/usuario.routes');
 const cursoRoutes = require('./routes/curso.routes');
 const publicacionRoutes = require('./routes/publicacion.routes');
+const comentarioRoutes = require('./routes/comentario.routes');
 const profesorRoutes = require('./routes/profesor.routes');
 
 dotenv.config();
@@ -22,6 +23,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/cursos', cursoRoutes);
 app.use('/api/publicaciones', publicacionRoutes);
+app.use('/api/comentarios', comentarioRoutes);
 app.use('/api/profesores', profesorRoutes);
 
 app.get('/', (req, res) => {
