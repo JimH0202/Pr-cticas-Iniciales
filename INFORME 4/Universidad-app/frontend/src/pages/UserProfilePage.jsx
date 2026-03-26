@@ -62,7 +62,8 @@ function UserProfilePage({ userId, token, currentUser, onBack, onPublicacionUpda
   const loadCursos = async () => {
     try {
       const cursosResult = await fetchCursos(token);
-      setAllCursos(cursosResult || []);
+      const cursos = cursosResult.cursos || cursosResult || [];
+      setAllCursos(Array.isArray(cursos) ? cursos : []);
     } catch (error) {
       console.error('Error al cargar cursos:', error);
     }
@@ -144,6 +145,7 @@ function UserProfilePage({ userId, token, currentUser, onBack, onPublicacionUpda
   };
 
   const getCursosNoAprobados = () => {
+    if (!allCursos || !Array.isArray(allCursos)) return [];
     if (!user || !user.cursosAprobados) return allCursos;
     return allCursos.filter(curso => !user.cursosAprobados.find(c => c.id === curso.id));
   };
