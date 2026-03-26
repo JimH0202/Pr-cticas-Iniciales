@@ -12,8 +12,8 @@ function PublicationCard({ publicacion, token, currentUserId, onPublicacionUpdat
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleCommentClick = async () => {
-    if (!showComments && comentarios.length === 0) {
-      // Cargar comentarios solo si no se han cargado aún
+    if (!showComments) {
+      // Cargar comentarios cuando se abre la sección de comentarios
       if (token) {
         try {
           const result = await fetchComentarios(token, publicacion.id);
