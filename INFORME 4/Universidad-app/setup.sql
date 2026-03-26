@@ -73,7 +73,13 @@ INSERT IGNORE INTO profesores (nombres, apellidos, departamento) VALUES
 
 INSERT IGNORE INTO cursos (nombre, codigo, creditos, profesor_id) VALUES
   ('Programación I', 'IC-101', 4, 1),
-  ('Bases de Datos', 'IC-202', 4, 2);
+  ('Bases de Datos', 'IC-202', 4, 2),
+  ('Matemáticas Avanzadas', 'MAT-401', 4, 1),
+  ('Programación en Java', 'CS-301', 4, 2),
+  ('Bases de Datos', 'CS-205', 3, 2),
+  ('Algoritmos', 'CS-202', 4, 1),
+  ('Desarrollo Web', 'CS-401', 4, 2),
+  ('Física Cuántica', 'PHYS-301', 3, 1);
 
 -- Usuario de ejemplo (contraseña: admin123)
 INSERT IGNORE INTO usuarios (registro, nombres, apellidos, email, password_hash)
