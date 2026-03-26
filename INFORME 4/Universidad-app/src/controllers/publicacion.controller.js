@@ -1,11 +1,40 @@
 const publicacionService = require('../services/publicacion.service');
 const comentarioService = require('../services/comentario.service');
 
+const sanitizePublicacion = (publicacion) => {
+  if (!publicacion) return null;
+  return {
+    id: publicacion.id,
+    mensaje: publicacion.mensaje,
+    curso_id: publicacion.curso_id,
+    profesor_id: publicacion.profesor_id,
+    usuario_id: publicacion.usuario_id,
+    created_at: publicacion.created_at,
+    usuario: {
+      id: publicacion.usuario_id,
+      registro: publicacion.usuario_registro || '',
+      nombres: publicacion.usuario_nombres || '',
+      apellidos: publicacion.usuario_apellidos || ''
+    },
+    curso: publicacion.curso_id ? {
+      id: publicacion.curso_id,
+      nombre: publicacion.curso_nombre || '',
+      codigo: publicacion.curso_codigo || ''
+    } : null,
+    profesor: publicacion.profesor_id ? {
+      id: publicacion.profesor_id,
+      nombres: publicacion.profesor_nombres || '',
+      apellidos: publicacion.profesor_apellidos || ''
+    } : null,
+    fechaCreacion: publicacion.created_at
+  };
+};
+
 const listPublicaciones = async (req, res, next) => {
   try {
     const { cursoId, profesorId, cursoNombre, profesorNombre } = req.query;
     const publicaciones = await publicacionService.listPublicaciones({ cursoId, profesorId, cursoNombre, profesorNombre });
-    res.json({ publicaciones });
+    res.json({ publicaciones: publicaciones.map(sanitizePublicacion) });
   } catch (err) {
     next(err);
   }
@@ -26,7 +55,7 @@ const createPublicacion = async (req, res, next) => {
     const usuarioId = req.user.id;
     const { cursoId, profesorId, mensaje } = req.body;
     const publicacion = await publicacionService.createPublicacion({ usuarioId, cursoId, profesorId, mensaje });
-    res.status(201).json({ publicacion });
+    res.status(201).json({ publicacion: sanitizePublicacion(publicacion) });
   } catch (err) {
     next(err);
   }
@@ -38,7 +67,7 @@ const updatePublicacion = async (req, res, next) => {
     const usuarioId = req.user.id;
     const { mensaje } = req.body;
     const publicacion = await publicacionService.updatePublicacion(publicacionId, usuarioId, mensaje);
-    res.json({ publicacion });
+    res.json({ publicacion: sanitizePublicacion(publicacion) });
   } catch (err) {
     next(err);
   }

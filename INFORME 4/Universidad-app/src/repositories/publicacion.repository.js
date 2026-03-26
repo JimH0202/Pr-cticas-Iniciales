@@ -39,9 +39,13 @@ const findAll = async ({ cursoId, profesorId, cursoNombre, profesorNombre } = {}
 
 const findById = async (id) => {
   const [rows] = await pool.query(
-    `SELECT p.*, u.registro AS usuario_registro, u.nombres AS usuario_nombres, u.apellidos AS usuario_apellidos
+    `SELECT p.*, u.registro AS usuario_registro, u.nombres AS usuario_nombres, u.apellidos AS usuario_apellidos,
+            c.nombre AS curso_nombre, c.codigo AS curso_codigo,
+            prof.nombres AS profesor_nombres, prof.apellidos AS profesor_apellidos
      FROM publicaciones p
      JOIN usuarios u ON p.usuario_id = u.id
+     LEFT JOIN cursos c ON p.curso_id = c.id
+     LEFT JOIN profesores prof ON p.profesor_id = prof.id
      WHERE p.id = ?`,
     [id]
   );

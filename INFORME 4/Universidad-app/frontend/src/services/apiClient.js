@@ -102,7 +102,7 @@ export async function forgotPassword(email) {
 export async function getUserProfile(token, userId) {
   try {
     const response = await axiosInstance.get(`/usuarios/${userId}`);
-    return { user: response.data };
+    return { user: response.data.usuario };
   } catch (error) {
     const message = error.response?.data?.message || 'Usuario no encontrado';
     throw { 
@@ -116,7 +116,7 @@ export async function getUserProfile(token, userId) {
 export async function searchUserByRegistro(token, registro) {
   try {
     const response = await axiosInstance.get(`/usuarios/registro/${registro}`);
-    return { user: response.data };
+    return { user: response.data.usuario };
   } catch (error) {
     const message = error.response?.data?.message || 'Usuario no encontrado';
     throw { 
@@ -132,9 +132,9 @@ export async function updateUserProfile(token, userId, userData) {
     const response = await axiosInstance.put('/usuarios', userData);
     
     // Actualizar usuario en localStorage
-    localStorage.setItem(config.storage.user, JSON.stringify(response.data.user));
+    localStorage.setItem(config.storage.user, JSON.stringify(response.data.usuario));
     
-    return { user: response.data.user };
+    return { user: response.data.usuario };
   } catch (error) {
     const message = error.response?.data?.message || 'Error al actualizar perfil';
     throw { 
@@ -148,7 +148,7 @@ export async function updateUserProfile(token, userId, userData) {
 export async function getApprovedCourses(token, userId) {
   try {
     const response = await axiosInstance.get(`/usuarios/${userId}/cursos-aprobados`);
-    return { cursosAprobados: response.data };
+    return { cursosAprobados: response.data.cursos };
   } catch (error) {
     const message = error.response?.data?.message || 'Error al obtener cursos aprobados';
     throw { 
@@ -209,7 +209,7 @@ export async function removeCursoAprobado(token, userId, cursoId) {
 export async function fetchPublicaciones(token, filters = {}) {
   try {
     const response = await axiosInstance.get('/publicaciones', { params: filters });
-    return { publicaciones: response.data };
+    return { publicaciones: response.data.publicaciones };
   } catch (error) {
     const message = error.response?.data?.message || 'Error al obtener publicaciones';
     throw { 
@@ -225,7 +225,7 @@ export async function fetchPublicacionesByUser(token, userId) {
     const response = await axiosInstance.get('/publicaciones', {
       params: { usuarioId: userId }
     });
-    return { publicaciones: response.data };
+    return { publicaciones: response.data.publicaciones };
   } catch (error) {
     const message = error.response?.data?.message || 'Error al obtener publicaciones del usuario';
     throw { 
@@ -244,7 +244,7 @@ export async function createPublicacion(token, usuarioId, { cursoId, profesorId,
       mensaje
     });
     
-    return { publicacion: response.data };
+    return { publicacion: response.data.publicacion };
   } catch (error) {
     const message = error.response?.data?.message || 'Error al crear publicación';
     throw { 
@@ -261,7 +261,7 @@ export async function updatePublicacion(token, publicacionId, mensaje) {
       mensaje
     });
     
-    return { publicacion: response.data };
+    return { publicacion: response.data.publicacion };
   } catch (error) {
     const message = error.response?.data?.message || 'Error al actualizar publicación';
     throw { 
@@ -291,7 +291,7 @@ export async function deletePublicacion(token, publicacionId) {
 export async function fetchComentarios(token, publicacionId) {
   try {
     const response = await axiosInstance.get(`/comentarios/${publicacionId}`);
-    return { comentarios: response.data };
+    return { comentarios: response.data.comentarios };
   } catch (error) {
     const message = error.response?.data?.message || 'Error al obtener comentarios';
     throw { 
@@ -308,7 +308,7 @@ export async function createComentario(token, publicacionId, mensaje) {
       mensaje
     });
     
-    return { comentario: response.data };
+    return { comentario: response.data.comentario };
   } catch (error) {
     const message = error.response?.data?.message || 'Error al crear comentario';
     throw { 
