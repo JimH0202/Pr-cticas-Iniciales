@@ -52,7 +52,7 @@ const updateUser = async (id, { nombres, apellidos, email, passwordHash }) => {
 
 const getApprovedCourses = async (userId) => {
   const [rows] = await pool.query(
-    `SELECT c.id, c.nombre, c.codigo, c.creditos, a.profesor_nombre
+    `SELECT c.id, c.nombre, c.codigo, c.creditos, a.profesor_nombre as profesor
      FROM cursos_aprobados a
      JOIN cursos c ON a.curso_id = c.id
      WHERE a.usuario_id = ?`,
